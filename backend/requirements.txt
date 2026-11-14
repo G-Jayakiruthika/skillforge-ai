@@ -1,0 +1,9 @@
+fastapi>=0.115
+uvicorn[standard]>=0.30
+pydantic>=2.7
+# Agent orchestration (optional - a built-in state machine is used if missing)
+langgraph>=0.2
+# Google Gemini (optional - only used when GEMINI_API_KEY is set)
+google-genai>=1.0
+# Tests
+pytest>=8

@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>SkillForge AI - Adaptive Career & Learning Engine</title>
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 32 32%22><rect width=%2232%22 height=%2232%22 rx=%228%22 fill=%22%234f46e5%22/><text x=%2216%22 y=%2221%22 font-size=%2214%22 text-anchor=%22middle%22 fill=%22white%22 font-family=%22sans-serif%22>SF</text></svg>" />
+  <link rel="stylesheet" href="/static/styles.css" />
+</head>
+<body>
+  <header class="topbar">
+    <div class="brand">
+      <div class="logo">SF</div>
+      <div>
+        <div class="brand-name">SkillForge AI</div>
+        <div class="brand-sub">Multi-agent adaptive career &amp; learning engine</div>
+      </div>
+    </div>
+    <div class="top-actions">
+      <span id="engine-pill" class="pill">connecting...</span>
+      <select id="learner-select" aria-label="Choose learner"></select>
+      <button class="btn ghost" id="new-learner">+ New learner</button>
+    </div>
+  </header>
+
+  <nav class="tabs" id="tabs">
+    <button data-tab="dashboard" class="active">Dashboard</button>
+    <button data-tab="profile">Profile</button>
+    <button data-tab="roadmap">Roadmap</button>
+    <button data-tab="progress">Progress</button>
+    <button data-tab="mentor">AI Mentor</button>
+    <button data-tab="org">Organization</button>
+  </nav>
+
+  <main>
+    <section id="tab-dashboard" class="tab active"></section>
+    <section id="tab-profile" class="tab"></section>
+    <section id="tab-roadmap" class="tab"></section>
+    <section id="tab-progress" class="tab"></section>
+    <section id="tab-mentor" class="tab"></section>
+    <section id="tab-org" class="tab"></section>
+  </main>
+
+  <!-- Agent collaboration bus -->
+  <aside class="bus" id="bus">
+    <div class="bus-head">
+      <strong>Agent collaboration</strong>
+      <button class="icon-btn" id="bus-toggle" title="Collapse">&#8211;</button>
+    </div>
+    <ol id="bus-list"><li class="muted">Agent messages appear here after each action.</li></ol>
+  </aside>
+
+  <!-- Assessment modal -->
+  <div class="modal" id="modal" hidden>
+    <div class="modal-card" role="dialog" aria-modal="true" aria-labelledby="modal-title">
+      <div class="modal-head">
+        <h3 id="modal-title">Assessment</h3>
+        <button class="icon-btn" id="modal-close" aria-label="Close">&times;</button>
+      </div>
+      <div class="seg" id="modal-seg">
+        <button data-mode="quiz" class="active">Quiz</button>
+        <button data-mode="explain">Explain (voice / text)</button>
+      </div>
+      <div id="modal-body"></div>
+    </div>
+  </div>
+
+  <div class="toast" id="toast" hidden></div>
+  <script src="/static/app.js"></script>
+</body>
+</html>
