@@ -220,7 +220,9 @@ export function createScene(canvas, { reduced = false } = {}) {
   }
   loop();
 
+  const hexRgb = (h) => { const n = parseInt(h.slice(1), 16); return [(n >> 16) / 255, ((n >> 8) & 255) / 255, (n & 255) / 255]; };
   return {
+    setAccent(a, b) { try { APP_STAGE.ca = hexRgb(a); APP_STAGE.cb = hexRgb(b); if (mode === "app") Object.assign(target, APP_STAGE); } catch (_) {} },
     setProgress(p) { progress = p; if (mode === "home") lerpStage(p); },
     setMode(m) {
       mode = m;
@@ -248,5 +250,5 @@ export function createFallback(canvas) {
     requestAnimationFrame(frame);
   }
   requestAnimationFrame(frame);
-  return { setProgress() {}, setMode() {}, pulse() {}, warp() {} };
+  return { setProgress() {}, setMode() {}, pulse() {}, warp() {}, setAccent() {} };
 }

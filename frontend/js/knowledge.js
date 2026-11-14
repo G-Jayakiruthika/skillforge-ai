@@ -4229,5 +4229,2545 @@ export default {
   "Digital Marketing Executive": "Marketing & Design",
   "UI/UX Designer": "Marketing & Design",
   "Clinical Research Associate": "Healthcare & Life Sciences"
- }
+ },
+ "PRIVACY_CATEGORIES": [
+  {
+   "key": "essential",
+   "name": "Essential",
+   "required": true,
+   "what": "Your sign-in session, your saved preferences (theme, text size) and basic security counters.",
+   "why": "Without these the site cannot keep you signed in or protect accounts from password guessing.",
+   "legal": "Necessary for the service you asked for (GDPR Art. 6(1)(b); DPDP: legitimate use)."
+  },
+  {
+   "key": "analytics",
+   "name": "Analytics",
+   "required": false,
+   "what": "Anonymous counts of which pages and features are used.",
+   "why": "Helps us see which parts of the platform actually help students. Off until you switch it on.",
+   "legal": "Consent (GDPR Art. 6(1)(a); DPDP s.6)."
+  },
+  {
+   "key": "marketing",
+   "name": "Marketing",
+   "required": false,
+   "what": "Emails about new features, and no advertising cookies of any kind.",
+   "why": "Only if you want to hear from us. Off by default.",
+   "legal": "Consent; you can withdraw it here at any time."
+  },
+  {
+   "key": "ai_processing",
+   "name": "AI processing",
+   "required": false,
+   "what": "Sending your typed answers or resume text to Google Gemini to grade or extract skills.",
+   "why": "Optional. With this off, everything is graded by the built-in rules on this server instead - you keep the full platform, nothing leaves it.",
+   "legal": "Consent; a processor outside this server is involved only when it is on."
+  }
+ ],
+ "DATA_WE_KEEP": [
+  [
+   "Account",
+   "Name, email, role, college, department.",
+   "To sign you in and show you to your own faculty."
+  ],
+  [
+   "Password",
+   "Never stored. Only an unreadable PBKDF2-SHA256 hash is kept.",
+   "So nobody - including us - can read it."
+  ],
+  [
+   "Learner profile",
+   "Skills, certificates, projects, goal, dream company, study hours.",
+   "To build your roadmap and career match."
+  ],
+  [
+   "Progress",
+   "Assessment scores, study hours, game points, achievements.",
+   "To track progress and adapt your plan."
+  ],
+  [
+   "Messages",
+   "Questions you send to faculty and their replies.",
+   "So you can read the answers."
+  ],
+  [
+   "Contact messages",
+   "Anything you send through the contact form.",
+   "So we can reply."
+  ],
+  [
+   "Technical",
+   "Your IP address is used in memory for rate limiting and is never written to a file or database.",
+   "To stop abuse."
+  ]
+ ],
+ "INSTITUTIONS": [
+  {
+   "id": "a-d-m-college-for-women",
+   "name": "A.D.M. College for Women",
+   "kind": "college",
+   "type": "Arts & Science College",
+   "city": "Nagapattinam",
+   "district": "Nagapattinam",
+   "state": "Tamil Nadu",
+   "affiliation": ""
+  },
+  {
+   "id": "a-v-v-m-sri-pushpam-college",
+   "name": "A.V.V.M. Sri Pushpam College",
+   "kind": "college",
+   "type": "Arts & Science College",
+   "city": "Poondi",
+   "district": "Thanjavur",
+   "state": "Tamil Nadu",
+   "affiliation": ""
+  },
+  {
+   "id": "adithya-institute-of-technology",
+   "name": "Adithya Institute of Technology",
+   "kind": "college",
+   "type": "Engineering College",
+   "city": "Coimbatore",
+   "district": "Coimbatore",
+   "state": "Tamil Nadu",
+   "affiliation": ""
+  },
+  {
+   "id": "agricultural-college-and-research-institute-chettinad",
+   "name": "Agricultural College and Research Institute, Chettinad",
+   "kind": "college",
+   "type": "Agricultural College",
+   "city": "Chettinad",
+   "district": "Sivaganga",
+   "state": "Tamil Nadu",
+   "affiliation": ""
+  },
+  {
+   "id": "agricultural-college-and-research-institute-coimbatore",
+   "name": "Agricultural College and Research Institute, Coimbatore",
+   "kind": "college",
+   "type": "Agricultural College",
+   "city": "Coimbatore",
+   "district": "Coimbatore",
+   "state": "Tamil Nadu",
+   "affiliation": ""
+  },
+  {
+   "id": "agricultural-college-and-research-institute-karur",
+   "name": "Agricultural College and Research Institute, Karur",
+   "kind": "college",
+   "type": "Agricultural College",
+   "city": "Karur",
+   "district": "Karur",
+   "state": "Tamil Nadu",
+   "affiliation": ""
+  },
+  {
+   "id": "agricultural-college-and-research-institute-keezhvelur",
+   "name": "Agricultural College and Research Institute, Keezhvelur",
+   "kind": "college",
+   "type": "Agricultural College",
+   "city": "Keezhvelur",
+   "district": "Nagapattinam",
+   "state": "Tamil Nadu",
+   "affiliation": ""
+  },
+  {
+   "id": "agricultural-college-and-research-institute-kudumiyanmalai",
+   "name": "Agricultural College and Research Institute, Kudumiyanmalai",
+   "kind": "college",
+   "type": "Agricultural College",
+   "city": "Kudumiyanmalai",
+   "district": "Pudukkottai",
+   "state": "Tamil Nadu",
+   "affiliation": ""
+  },
+  {
+   "id": "agricultural-college-and-research-institute-madurai",
+   "name": "Agricultural College and Research Institute, Madurai",
+   "kind": "college",
+   "type": "Agricultural College",
+   "city": "Madurai",
+   "district": "Madurai",
+   "state": "Tamil Nadu",
+   "affiliation": ""
+  },
+  {
+   "id": "agricultural-college-and-research-institute-vazhavachanur",
+   "name": "Agricultural College and Research Institute, Vazhavachanur",
+   "kind": "college",
+   "type": "Agricultural College",
+   "city": "Vazhavachanur",
+   "district": "Tiruvannamalai",
+   "state": "Tamil Nadu",
+   "affiliation": ""
+  },
+  {
+   "id": "agricultural-engineering-college-and-research-institute-coim",
+   "name": "Agricultural Engineering College and Research Institute, Coimbatore",
+   "kind": "college",
+   "type": "Agricultural College",
+   "city": "Coimbatore",
+   "district": "Coimbatore",
+   "state": "Tamil Nadu",
+   "affiliation": ""
+  },
+  {
+   "id": "agricultural-engineering-college-and-research-institute-kumu",
+   "name": "Agricultural Engineering College and Research Institute, Kumulur",
+   "kind": "college",
+   "type": "Agricultural College",
+   "city": "Kumulur",
+   "district": "Tiruchirappalli",
+   "state": "Tamil Nadu",
+   "affiliation": ""
+  },
+  {
+   "id": "agurchand-manmull-jain-college",
+   "name": "Agurchand Manmull Jain College",
+   "kind": "college",
+   "type": "Arts & Science College",
+   "city": "Chennai",
+   "district": "Chennai",
+   "state": "Tamil Nadu",
+   "affiliation": ""
+  },
+  {
+   "id": "alagappa-chettiar-government-college-of-engineering-and-tech",
+   "name": "Alagappa Chettiar Government College of Engineering and Technology",
+   "kind": "college",
+   "type": "Engineering College",
+   "city": "Karaikudi",
+   "district": "Sivaganga",
+   "state": "Tamil Nadu",
+   "affiliation": ""
+  },
+  {
+   "id": "alagappa-college-of-technology",
+   "name": "Alagappa College of Technology",
+   "kind": "college",
+   "type": "Engineering College",
+   "city": "Chennai",
+   "district": "Chennai",
+   "state": "Tamil Nadu",
+   "affiliation": ""
+  },
+  {
+   "id": "alagappa-university",
+   "name": "Alagappa University",
+   "kind": "state",
+   "type": "State University",
+   "city": "Karaikudi",
+   "district": "Sivaganga",
+   "state": "Tamil Nadu",
+   "affiliation": ""
+  },
+  {
+   "id": "all-india-institute-of-medical-sciences-madurai",
+   "name": "All India Institute of Medical Sciences, Madurai",
+   "kind": "national",
+   "type": "National Institute",
+   "city": "Madurai",
+   "district": "Madurai",
+   "state": "Tamil Nadu",
+   "affiliation": ""
+  },
+  {
+   "id": "amet-university",
+   "name": "AMET University",
+   "kind": "deemed",
+   "type": "Deemed University",
+   "city": "Chennai",
+   "district": "Chengalpattu",
+   "state": "Tamil Nadu",
+   "affiliation": ""
+  },
+  {
+   "id": "amrita-vishwa-vidyapeetham",
+   "name": "Amrita Vishwa Vidyapeetham",
+   "kind": "deemed",
+   "type": "Deemed University",
+   "city": "Coimbatore",
+   "district": "Coimbatore",
+   "state": "Tamil Nadu",
+   "affiliation": ""
+  },
+  {
+   "id": "anbil-dharmalingam-agricultural-college-and-research-institu",
+   "name": "Anbil Dharmalingam Agricultural College and Research Institute",
+   "kind": "college",
+   "type": "Agricultural College",
+   "city": "Tiruchirappalli",
+   "district": "Tiruchirappalli",
+   "state": "Tamil Nadu",
+   "affiliation": ""
+  },
+  {
+   "id": "anna-university",
+   "name": "Anna University",
+   "kind": "state",
+   "type": "State University",
+   "city": "Chennai",
+   "district": "Chennai",
+   "state": "Tamil Nadu",
+   "affiliation": ""
+  },
+  {
+   "id": "annamalai-university",
+   "name": "Annamalai University",
+   "kind": "state",
+   "type": "State University",
+   "city": "Chidambaram",
+   "district": "Cuddalore",
+   "state": "Tamil Nadu",
+   "affiliation": ""
+  },
+  {
+   "id": "arunachala-college-of-engineering-for-women",
+   "name": "Arunachala College of Engineering for Women",
+   "kind": "college",
+   "type": "Engineering College",
+   "city": "Nagercoil",
+   "district": "Kanyakumari",
+   "state": "Tamil Nadu",
+   "affiliation": ""
+  },
+  {
+   "id": "avinashilingam-institute-for-home-science-and-higher-educati",
+   "name": "Avinashilingam Institute for Home Science and Higher Education for Women",
+   "kind": "deemed",
+   "type": "Deemed University",
+   "city": "Coimbatore",
+   "district": "Coimbatore",
+   "state": "Tamil Nadu",
+   "affiliation": ""
+  },
+  {
+   "id": "ayya-nadar-janaki-ammal-college",
+   "name": "Ayya Nadar Janaki Ammal College",
+   "kind": "college",
+   "type": "Arts & Science College",
+   "city": "Sivakasi",
+   "district": "Virudhunagar",
+   "state": "Tamil Nadu",
+   "affiliation": ""
+  },
+  {
+   "id": "b-s-abdur-rahman-crescent-institute-of-science-and-technolog",
+   "name": "B.S. Abdur Rahman Crescent Institute of Science and Technology",
+   "kind": "deemed",
+   "type": "Deemed University",
+   "city": "Chennai",
+   "district": "Chengalpattu",
+   "state": "Tamil Nadu",
+   "affiliation": ""
+  },
+  {
+   "id": "bannari-amman-institute-of-technology",
+   "name": "Bannari Amman Institute of Technology",
+   "kind": "college",
+   "type": "Engineering College",
+   "city": "Sathyamangalam",
+   "district": "Erode",
+   "state": "Tamil Nadu",
+   "affiliation": ""
+  },
+  {
+   "id": "bhajarang-engineering-college",
+   "name": "Bhajarang Engineering College",
+   "kind": "college",
+   "type": "Engineering College",
+   "city": "Tiruvallur",
+   "district": "Tiruvallur",
+   "state": "Tamil Nadu",
+   "affiliation": ""
+  },
+  {
+   "id": "bharath-institute-of-higher-education-and-research",
+   "name": "Bharath Institute of Higher Education and Research",
+   "kind": "deemed",
+   "type": "Deemed University",
+   "city": "Chennai",
+   "district": "Chennai",
+   "state": "Tamil Nadu",
+   "affiliation": ""
+  },
+  {
+   "id": "bharathiar-university",
+   "name": "Bharathiar University",
+   "kind": "state",
+   "type": "State University",
+   "city": "Coimbatore",
+   "district": "Coimbatore",
+   "state": "Tamil Nadu",
+   "affiliation": ""
+  },
+  {
+   "id": "bharathidasan-institute-of-management",
+   "name": "Bharathidasan Institute of Management",
+   "kind": "national",
+   "type": "Research Institute",
+   "city": "Tiruchirappalli",
+   "district": "Tiruchirappalli",
+   "state": "Tamil Nadu",
+   "affiliation": ""
+  },
+  {
+   "id": "bharathidasan-university",
+   "name": "Bharathidasan University",
+   "kind": "state",
+   "type": "State University",
+   "city": "Tiruchirappalli",
+   "district": "Tiruchirappalli",
+   "state": "Tamil Nadu",
+   "affiliation": ""
+  },
+  {
+   "id": "bishop-heber-college",
+   "name": "Bishop Heber College",
+   "kind": "college",
+   "type": "Arts & Science College",
+   "city": "Tiruchirappalli",
+   "district": "Tiruchirappalli",
+   "state": "Tamil Nadu",
+   "affiliation": ""
+  },
+  {
+   "id": "central-electrochemical-research-institute",
+   "name": "Central Electrochemical Research Institute",
+   "kind": "national",
+   "type": "Research Institute",
+   "city": "Karaikudi",
+   "district": "Sivaganga",
+   "state": "Tamil Nadu",
+   "affiliation": ""
+  },
+  {
+   "id": "central-institute-of-brackishwater-aquaculture",
+   "name": "Central Institute of Brackishwater Aquaculture",
+   "kind": "national",
+   "type": "Research Institute",
+   "city": "Chennai",
+   "district": "Chennai",
+   "state": "Tamil Nadu",
+   "affiliation": ""
+  },
+  {
+   "id": "central-leather-research-institute",
+   "name": "Central Leather Research Institute",
+   "kind": "national",
+   "type": "Research Institute",
+   "city": "Chennai",
+   "district": "Chennai",
+   "state": "Tamil Nadu",
+   "affiliation": ""
+  },
+  {
+   "id": "central-university-of-tamil-nadu",
+   "name": "Central University of Tamil Nadu",
+   "kind": "central",
+   "type": "Central University",
+   "city": "Tiruvarur",
+   "district": "Tiruvarur",
+   "state": "Tamil Nadu",
+   "affiliation": ""
+  },
+  {
+   "id": "chennai-mathematical-institute",
+   "name": "Chennai Mathematical Institute",
+   "kind": "deemed",
+   "type": "Deemed University",
+   "city": "Kelambakkam",
+   "district": "Chengalpattu",
+   "state": "Tamil Nadu",
+   "affiliation": ""
+  },
+  {
+   "id": "chettinad-academy-of-research-and-education",
+   "name": "Chettinad Academy of Research and Education",
+   "kind": "deemed",
+   "type": "Deemed University",
+   "city": "Kelambakkam",
+   "district": "Chengalpattu",
+   "state": "Tamil Nadu",
+   "affiliation": ""
+  },
+  {
+   "id": "chikkaiah-naicker-college",
+   "name": "Chikkaiah Naicker College",
+   "kind": "college",
+   "type": "Arts & Science College",
+   "city": "Erode",
+   "district": "Erode",
+   "state": "Tamil Nadu",
+   "affiliation": ""
+  },
+  {
+   "id": "coimbatore-institute-of-technology",
+   "name": "Coimbatore Institute of Technology",
+   "kind": "college",
+   "type": "Engineering College",
+   "city": "Coimbatore",
+   "district": "Coimbatore",
+   "state": "Tamil Nadu",
+   "affiliation": ""
+  },
+  {
+   "id": "coimbatore-medical-college",
+   "name": "Coimbatore Medical College",
+   "kind": "college",
+   "type": "Medical College",
+   "city": "Coimbatore",
+   "district": "Coimbatore",
+   "state": "Tamil Nadu",
+   "affiliation": ""
+  },
+  {
+   "id": "college-of-agricultural-technology-theni",
+   "name": "College of Agricultural Technology, Theni",
+   "kind": "college",
+   "type": "Agricultural College",
+   "city": "Kullapuram",
+   "district": "Theni",
+   "state": "Tamil Nadu",
+   "affiliation": ""
+  },
+  {
+   "id": "college-of-engineering-guindy",
+   "name": "College of Engineering, Guindy",
+   "kind": "college",
+   "type": "Engineering College",
+   "city": "Chennai",
+   "district": "Chennai",
+   "state": "Tamil Nadu",
+   "affiliation": ""
+  },
+  {
+   "id": "community-science-college-and-research-institute-madurai",
+   "name": "Community Science College and Research Institute, Madurai",
+   "kind": "college",
+   "type": "Agricultural College",
+   "city": "Madurai",
+   "district": "Madurai",
+   "state": "Tamil Nadu",
+   "affiliation": ""
+  },
+  {
+   "id": "dhanalakshmi-srinivasan-university",
+   "name": "Dhanalakshmi Srinivasan University",
+   "kind": "private",
+   "type": "Private University",
+   "city": "Tiruchirappalli",
+   "district": "Tiruchirappalli",
+   "state": "Tamil Nadu",
+   "affiliation": ""
+  },
+  {
+   "id": "dr-m-g-r-educational-and-research-institute",
+   "name": "Dr. M.G.R. Educational and Research Institute",
+   "kind": "deemed",
+   "type": "Deemed University",
+   "city": "Chennai",
+   "district": "Chennai",
+   "state": "Tamil Nadu",
+   "affiliation": ""
+  },
+  {
+   "id": "dr-m-s-swaminathan-agricultural-college-and-research-institu",
+   "name": "Dr. M.S. Swaminathan Agricultural College and Research Institute, Eachangottai",
+   "kind": "college",
+   "type": "Agricultural College",
+   "city": "Eachangottai",
+   "district": "Thanjavur",
+   "state": "Tamil Nadu",
+   "affiliation": ""
+  },
+  {
+   "id": "dr-sivanthi-aditanar-college-of-engineering",
+   "name": "Dr. Sivanthi Aditanar College of Engineering",
+   "kind": "college",
+   "type": "Engineering College",
+   "city": "Tiruchendur",
+   "district": "Thoothukudi",
+   "state": "Tamil Nadu",
+   "affiliation": ""
+  },
+  {
+   "id": "easwari-engineering-college",
+   "name": "Easwari Engineering College",
+   "kind": "college",
+   "type": "Engineering College",
+   "city": "Chennai",
+   "district": "Chennai",
+   "state": "Tamil Nadu",
+   "affiliation": ""
+  },
+  {
+   "id": "erode-arts-and-science-college",
+   "name": "Erode Arts and Science College",
+   "kind": "college",
+   "type": "Arts & Science College",
+   "city": "Erode",
+   "district": "Erode",
+   "state": "Tamil Nadu",
+   "affiliation": ""
+  },
+  {
+   "id": "ethiraj-college-for-women",
+   "name": "Ethiraj College for Women",
+   "kind": "college",
+   "type": "Arts & Science College",
+   "city": "Chennai",
+   "district": "Chennai",
+   "state": "Tamil Nadu",
+   "affiliation": ""
+  },
+  {
+   "id": "forestry-college-and-research-institute-mettupalayam",
+   "name": "Forestry College and Research Institute, Mettupalayam",
+   "kind": "college",
+   "type": "Agricultural College",
+   "city": "Mettupalayam",
+   "district": "Coimbatore",
+   "state": "Tamil Nadu",
+   "affiliation": ""
+  },
+  {
+   "id": "government-ariyalur-medical-college",
+   "name": "Government Ariyalur Medical College",
+   "kind": "college",
+   "type": "Medical College",
+   "city": "Ariyalur",
+   "district": "Ariyalur",
+   "state": "Tamil Nadu",
+   "affiliation": ""
+  },
+  {
+   "id": "government-arts-college-coimbatore",
+   "name": "Government Arts College, Coimbatore",
+   "kind": "college",
+   "type": "Arts & Science College",
+   "city": "Coimbatore",
+   "district": "Coimbatore",
+   "state": "Tamil Nadu",
+   "affiliation": ""
+  },
+  {
+   "id": "government-arts-college-karur",
+   "name": "Government Arts College, Karur",
+   "kind": "college",
+   "type": "Arts & Science College",
+   "city": "Karur",
+   "district": "Karur",
+   "state": "Tamil Nadu",
+   "affiliation": ""
+  },
+  {
+   "id": "government-chengalpattu-medical-college",
+   "name": "Government Chengalpattu Medical College",
+   "kind": "college",
+   "type": "Medical College",
+   "city": "Chengalpattu",
+   "district": "Chengalpattu",
+   "state": "Tamil Nadu",
+   "affiliation": ""
+  },
+  {
+   "id": "government-college-of-engineering-erode-irtt",
+   "name": "Government College of Engineering, Erode (IRTT)",
+   "kind": "college",
+   "type": "Engineering College",
+   "city": "Erode",
+   "district": "Erode",
+   "state": "Tamil Nadu",
+   "affiliation": ""
+  },
+  {
+   "id": "government-college-of-engineering-salem",
+   "name": "Government College of Engineering, Salem",
+   "kind": "college",
+   "type": "Engineering College",
+   "city": "Salem",
+   "district": "Salem",
+   "state": "Tamil Nadu",
+   "affiliation": ""
+  },
+  {
+   "id": "government-college-of-engineering-tirunelveli",
+   "name": "Government College of Engineering, Tirunelveli",
+   "kind": "college",
+   "type": "Engineering College",
+   "city": "Tirunelveli",
+   "district": "Tirunelveli",
+   "state": "Tamil Nadu",
+   "affiliation": ""
+  },
+  {
+   "id": "government-college-of-technology-coimbatore",
+   "name": "Government College of Technology, Coimbatore",
+   "kind": "college",
+   "type": "Engineering College",
+   "city": "Coimbatore",
+   "district": "Coimbatore",
+   "state": "Tamil Nadu",
+   "affiliation": ""
+  },
+  {
+   "id": "government-cuddalore-medical-college",
+   "name": "Government Cuddalore Medical College",
+   "kind": "college",
+   "type": "Medical College",
+   "city": "Chidambaram",
+   "district": "Cuddalore",
+   "state": "Tamil Nadu",
+   "affiliation": ""
+  },
+  {
+   "id": "government-dharmapuri-medical-college",
+   "name": "Government Dharmapuri Medical College",
+   "kind": "college",
+   "type": "Medical College",
+   "city": "Dharmapuri",
+   "district": "Dharmapuri",
+   "state": "Tamil Nadu",
+   "affiliation": ""
+  },
+  {
+   "id": "government-dindigul-medical-college",
+   "name": "Government Dindigul Medical College",
+   "kind": "college",
+   "type": "Medical College",
+   "city": "Dindigul",
+   "district": "Dindigul",
+   "state": "Tamil Nadu",
+   "affiliation": ""
+  },
+  {
+   "id": "government-erode-medical-college",
+   "name": "Government Erode Medical College",
+   "kind": "college",
+   "type": "Medical College",
+   "city": "Perundurai",
+   "district": "Erode",
+   "state": "Tamil Nadu",
+   "affiliation": ""
+  },
+  {
+   "id": "government-kallakurichi-medical-college",
+   "name": "Government Kallakurichi Medical College",
+   "kind": "college",
+   "type": "Medical College",
+   "city": "Kallakurichi",
+   "district": "Kallakurichi",
+   "state": "Tamil Nadu",
+   "affiliation": ""
+  },
+  {
+   "id": "government-karur-medical-college",
+   "name": "Government Karur Medical College",
+   "kind": "college",
+   "type": "Medical College",
+   "city": "Karur",
+   "district": "Karur",
+   "state": "Tamil Nadu",
+   "affiliation": ""
+  },
+  {
+   "id": "government-krishnagiri-medical-college",
+   "name": "Government Krishnagiri Medical College",
+   "kind": "college",
+   "type": "Medical College",
+   "city": "Krishnagiri",
+   "district": "Krishnagiri",
+   "state": "Tamil Nadu",
+   "affiliation": ""
+  },
+  {
+   "id": "government-medical-college-omandurar-government-estate",
+   "name": "Government Medical College, Omandurar Government Estate",
+   "kind": "college",
+   "type": "Medical College",
+   "city": "Chennai",
+   "district": "Chennai",
+   "state": "Tamil Nadu",
+   "affiliation": ""
+  },
+  {
+   "id": "government-medical-college-the-nilgiris",
+   "name": "Government Medical College, The Nilgiris",
+   "kind": "college",
+   "type": "Medical College",
+   "city": "Udhagamandalam",
+   "district": "The Nilgiris",
+   "state": "Tamil Nadu",
+   "affiliation": ""
+  },
+  {
+   "id": "government-mohan-kumaramangalam-medical-college",
+   "name": "Government Mohan Kumaramangalam Medical College",
+   "kind": "college",
+   "type": "Medical College",
+   "city": "Salem",
+   "district": "Salem",
+   "state": "Tamil Nadu",
+   "affiliation": ""
+  },
+  {
+   "id": "government-nagapattinam-medical-college",
+   "name": "Government Nagapattinam Medical College",
+   "kind": "college",
+   "type": "Medical College",
+   "city": "Nagapattinam",
+   "district": "Nagapattinam",
+   "state": "Tamil Nadu",
+   "affiliation": ""
+  },
+  {
+   "id": "government-namakkal-medical-college",
+   "name": "Government Namakkal Medical College",
+   "kind": "college",
+   "type": "Medical College",
+   "city": "Namakkal",
+   "district": "Namakkal",
+   "state": "Tamil Nadu",
+   "affiliation": ""
+  },
+  {
+   "id": "government-pudukkottai-medical-college",
+   "name": "Government Pudukkottai Medical College",
+   "kind": "college",
+   "type": "Medical College",
+   "city": "Pudukkottai",
+   "district": "Pudukkottai",
+   "state": "Tamil Nadu",
+   "affiliation": ""
+  },
+  {
+   "id": "government-ramanathapuram-medical-college",
+   "name": "Government Ramanathapuram Medical College",
+   "kind": "college",
+   "type": "Medical College",
+   "city": "Ramanathapuram",
+   "district": "Ramanathapuram",
+   "state": "Tamil Nadu",
+   "affiliation": ""
+  },
+  {
+   "id": "government-sivagangai-medical-college",
+   "name": "Government Sivagangai Medical College",
+   "kind": "college",
+   "type": "Medical College",
+   "city": "Sivaganga",
+   "district": "Sivaganga",
+   "state": "Tamil Nadu",
+   "affiliation": ""
+  },
+  {
+   "id": "government-theni-medical-college",
+   "name": "Government Theni Medical College",
+   "kind": "college",
+   "type": "Medical College",
+   "city": "Theni",
+   "district": "Theni",
+   "state": "Tamil Nadu",
+   "affiliation": ""
+  },
+  {
+   "id": "government-thiruvallur-medical-college",
+   "name": "Government Thiruvallur Medical College",
+   "kind": "college",
+   "type": "Medical College",
+   "city": "Tiruvallur",
+   "district": "Tiruvallur",
+   "state": "Tamil Nadu",
+   "affiliation": ""
+  },
+  {
+   "id": "government-thiruvarur-medical-college",
+   "name": "Government Thiruvarur Medical College",
+   "kind": "college",
+   "type": "Medical College",
+   "city": "Tiruvarur",
+   "district": "Tiruvarur",
+   "state": "Tamil Nadu",
+   "affiliation": ""
+  },
+  {
+   "id": "government-thoothukudi-medical-college",
+   "name": "Government Thoothukudi Medical College",
+   "kind": "college",
+   "type": "Medical College",
+   "city": "Thoothukudi",
+   "district": "Thoothukudi",
+   "state": "Tamil Nadu",
+   "affiliation": ""
+  },
+  {
+   "id": "government-tiruppur-medical-college",
+   "name": "Government Tiruppur Medical College",
+   "kind": "college",
+   "type": "Medical College",
+   "city": "Tiruppur",
+   "district": "Tiruppur",
+   "state": "Tamil Nadu",
+   "affiliation": ""
+  },
+  {
+   "id": "government-tiruvannamalai-medical-college",
+   "name": "Government Tiruvannamalai Medical College",
+   "kind": "college",
+   "type": "Medical College",
+   "city": "Tiruvannamalai",
+   "district": "Tiruvannamalai",
+   "state": "Tamil Nadu",
+   "affiliation": ""
+  },
+  {
+   "id": "government-vellore-medical-college",
+   "name": "Government Vellore Medical College",
+   "kind": "college",
+   "type": "Medical College",
+   "city": "Vellore",
+   "district": "Vellore",
+   "state": "Tamil Nadu",
+   "affiliation": ""
+  },
+  {
+   "id": "government-villupuram-medical-college",
+   "name": "Government Villupuram Medical College",
+   "kind": "college",
+   "type": "Medical College",
+   "city": "Villupuram",
+   "district": "Villupuram",
+   "state": "Tamil Nadu",
+   "affiliation": ""
+  },
+  {
+   "id": "government-virudhunagar-medical-college",
+   "name": "Government Virudhunagar Medical College",
+   "kind": "college",
+   "type": "Medical College",
+   "city": "Virudhunagar",
+   "district": "Virudhunagar",
+   "state": "Tamil Nadu",
+   "affiliation": ""
+  },
+  {
+   "id": "himt-college-hindustan-institute-of-maritime-training",
+   "name": "HIMT College (Hindustan Institute of Maritime Training)",
+   "kind": "college",
+   "type": "Other College",
+   "city": "Chennai",
+   "district": "Chennai",
+   "state": "Tamil Nadu",
+   "affiliation": ""
+  },
+  {
+   "id": "hindustan-institute-of-technology-and-science",
+   "name": "Hindustan Institute of Technology and Science",
+   "kind": "deemed",
+   "type": "Deemed University",
+   "city": "Chennai",
+   "district": "Chengalpattu",
+   "state": "Tamil Nadu",
+   "affiliation": ""
+  },
+  {
+   "id": "holy-cross-college-tiruchirappalli",
+   "name": "Holy Cross College, Tiruchirappalli",
+   "kind": "college",
+   "type": "Arts & Science College",
+   "city": "Tiruchirappalli",
+   "district": "Tiruchirappalli",
+   "state": "Tamil Nadu",
+   "affiliation": ""
+  },
+  {
+   "id": "horticultural-college-and-research-institute-for-women-tiruc",
+   "name": "Horticultural College and Research Institute for Women, Tiruchirappalli",
+   "kind": "college",
+   "type": "Agricultural College",
+   "city": "Tiruchirappalli",
+   "district": "Tiruchirappalli",
+   "state": "Tamil Nadu",
+   "affiliation": ""
+  },
+  {
+   "id": "horticultural-college-and-research-institute-coimbatore",
+   "name": "Horticultural College and Research Institute, Coimbatore",
+   "kind": "college",
+   "type": "Agricultural College",
+   "city": "Coimbatore",
+   "district": "Coimbatore",
+   "state": "Tamil Nadu",
+   "affiliation": ""
+  },
+  {
+   "id": "horticultural-college-and-research-institute-paiyur",
+   "name": "Horticultural College and Research Institute, Paiyur",
+   "kind": "college",
+   "type": "Agricultural College",
+   "city": "Paiyur",
+   "district": "Krishnagiri",
+   "state": "Tamil Nadu",
+   "affiliation": ""
+  },
+  {
+   "id": "horticultural-college-and-research-institute-periyakulam",
+   "name": "Horticultural College and Research Institute, Periyakulam",
+   "kind": "college",
+   "type": "Agricultural College",
+   "city": "Periyakulam",
+   "district": "Theni",
+   "state": "Tamil Nadu",
+   "affiliation": ""
+  },
+  {
+   "id": "icat-design-media-college",
+   "name": "ICAT Design & Media College",
+   "kind": "college",
+   "type": "Other College",
+   "city": "Chennai",
+   "district": "Chennai",
+   "state": "Tamil Nadu",
+   "affiliation": ""
+  },
+  {
+   "id": "indian-institute-of-handloom-technology",
+   "name": "Indian Institute of Handloom Technology",
+   "kind": "national",
+   "type": "Research Institute",
+   "city": "Salem",
+   "district": "Salem",
+   "state": "Tamil Nadu",
+   "affiliation": ""
+  },
+  {
+   "id": "indian-institute-of-information-technology-design-and-manufa",
+   "name": "Indian Institute of Information Technology, Design and Manufacturing, Kancheepuram",
+   "kind": "national",
+   "type": "National Institute",
+   "city": "Chennai",
+   "district": "Chengalpattu",
+   "state": "Tamil Nadu",
+   "affiliation": ""
+  },
+  {
+   "id": "indian-institute-of-information-technology-tiruchirappalli",
+   "name": "Indian Institute of Information Technology, Tiruchirappalli",
+   "kind": "national",
+   "type": "National Institute",
+   "city": "Tiruchirappalli",
+   "district": "Tiruchirappalli",
+   "state": "Tamil Nadu",
+   "affiliation": ""
+  },
+  {
+   "id": "indian-institute-of-management-tiruchirappalli",
+   "name": "Indian Institute of Management, Tiruchirappalli",
+   "kind": "national",
+   "type": "National Institute",
+   "city": "Tiruchirappalli",
+   "district": "Tiruchirappalli",
+   "state": "Tamil Nadu",
+   "affiliation": ""
+  },
+  {
+   "id": "indian-institute-of-technology-madras",
+   "name": "Indian Institute of Technology Madras",
+   "kind": "national",
+   "type": "National Institute",
+   "city": "Chennai",
+   "district": "Chennai",
+   "state": "Tamil Nadu",
+   "affiliation": ""
+  },
+  {
+   "id": "indian-maritime-university",
+   "name": "Indian Maritime University",
+   "kind": "central",
+   "type": "Central University",
+   "city": "Chennai",
+   "district": "Chennai",
+   "state": "Tamil Nadu",
+   "affiliation": ""
+  },
+  {
+   "id": "indra-ganesan-college-of-engineering",
+   "name": "Indra Ganesan College of Engineering",
+   "kind": "college",
+   "type": "Engineering College",
+   "city": "Tiruchirappalli",
+   "district": "Tiruchirappalli",
+   "state": "Tamil Nadu",
+   "affiliation": ""
+  },
+  {
+   "id": "institute-of-mathematical-sciences",
+   "name": "Institute of Mathematical Sciences",
+   "kind": "national",
+   "type": "Research Institute",
+   "city": "Chennai",
+   "district": "Chennai",
+   "state": "Tamil Nadu",
+   "affiliation": ""
+  },
+  {
+   "id": "j-k-k-nattraja-college-of-arts-science",
+   "name": "J.K.K. Nattraja College of Arts & Science",
+   "kind": "college",
+   "type": "Arts & Science College",
+   "city": "Komarapalayam",
+   "district": "Namakkal",
+   "state": "Tamil Nadu",
+   "affiliation": ""
+  },
+  {
+   "id": "j-k-k-nattraja-college-of-engineering-and-technology",
+   "name": "J.K.K. Nattraja College of Engineering and Technology",
+   "kind": "college",
+   "type": "Engineering College",
+   "city": "Komarapalayam",
+   "district": "Namakkal",
+   "state": "Tamil Nadu",
+   "affiliation": ""
+  },
+  {
+   "id": "jamal-mohamed-college",
+   "name": "Jamal Mohamed College",
+   "kind": "college",
+   "type": "Arts & Science College",
+   "city": "Tiruchirappalli",
+   "district": "Tiruchirappalli",
+   "state": "Tamil Nadu",
+   "affiliation": ""
+  },
+  {
+   "id": "jeppiaar-engineering-college",
+   "name": "Jeppiaar Engineering College",
+   "kind": "college",
+   "type": "Engineering College",
+   "city": "Chennai",
+   "district": "Chennai",
+   "state": "Tamil Nadu",
+   "affiliation": ""
+  },
+  {
+   "id": "jeppiaar-university",
+   "name": "Jeppiaar University",
+   "kind": "private",
+   "type": "Private University",
+   "city": "Chennai",
+   "district": "Chennai",
+   "state": "Tamil Nadu",
+   "affiliation": ""
+  },
+  {
+   "id": "jerusalem-college-of-engineering",
+   "name": "Jerusalem College of Engineering",
+   "kind": "college",
+   "type": "Engineering College",
+   "city": "Chennai",
+   "district": "Chennai",
+   "state": "Tamil Nadu",
+   "affiliation": ""
+  },
+  {
+   "id": "joy-university",
+   "name": "Joy University",
+   "kind": "private",
+   "type": "Private University",
+   "city": "Tirunelveli",
+   "district": "Tirunelveli",
+   "state": "Tamil Nadu",
+   "affiliation": ""
+  },
+  {
+   "id": "k-a-p-viswanatham-government-medical-college",
+   "name": "K.A.P. Viswanatham Government Medical College",
+   "kind": "college",
+   "type": "Medical College",
+   "city": "Tiruchirappalli",
+   "district": "Tiruchirappalli",
+   "state": "Tamil Nadu",
+   "affiliation": ""
+  },
+  {
+   "id": "k-l-n-college-of-engineering",
+   "name": "K.L.N. College of Engineering",
+   "kind": "college",
+   "type": "Engineering College",
+   "city": "Madurai",
+   "district": "Sivaganga",
+   "state": "Tamil Nadu",
+   "affiliation": ""
+  },
+  {
+   "id": "kalakshetra-foundation",
+   "name": "Kalakshetra Foundation",
+   "kind": "national",
+   "type": "National Institute",
+   "city": "Chennai",
+   "district": "Chennai",
+   "state": "Tamil Nadu",
+   "affiliation": ""
+  },
+  {
+   "id": "kalasalingam-academy-of-research-and-education",
+   "name": "Kalasalingam Academy of Research and Education",
+   "kind": "deemed",
+   "type": "Deemed University",
+   "city": "Krishnankoil",
+   "district": "Virudhunagar",
+   "state": "Tamil Nadu",
+   "affiliation": ""
+  },
+  {
+   "id": "kanyakumari-government-medical-college",
+   "name": "Kanyakumari Government Medical College",
+   "kind": "college",
+   "type": "Medical College",
+   "city": "Nagercoil",
+   "district": "Kanyakumari",
+   "state": "Tamil Nadu",
+   "affiliation": ""
+  },
+  {
+   "id": "karpagam-academy-of-higher-education",
+   "name": "Karpagam Academy of Higher Education",
+   "kind": "deemed",
+   "type": "Deemed University",
+   "city": "Coimbatore",
+   "district": "Coimbatore",
+   "state": "Tamil Nadu",
+   "affiliation": ""
+  },
+  {
+   "id": "karpagam-college-of-engineering",
+   "name": "Karpagam College of Engineering",
+   "kind": "college",
+   "type": "Engineering College",
+   "city": "Coimbatore",
+   "district": "Coimbatore",
+   "state": "Tamil Nadu",
+   "affiliation": ""
+  },
+  {
+   "id": "karunya-institute-of-technology-and-sciences",
+   "name": "Karunya Institute of Technology and Sciences",
+   "kind": "deemed",
+   "type": "Deemed University",
+   "city": "Coimbatore",
+   "district": "Coimbatore",
+   "state": "Tamil Nadu",
+   "affiliation": ""
+  },
+  {
+   "id": "kilpauk-medical-college",
+   "name": "Kilpauk Medical College",
+   "kind": "college",
+   "type": "Medical College",
+   "city": "Chennai",
+   "district": "Chennai",
+   "state": "Tamil Nadu",
+   "affiliation": ""
+  },
+  {
+   "id": "kongu-arts-and-science-college",
+   "name": "Kongu Arts and Science College",
+   "kind": "college",
+   "type": "Arts & Science College",
+   "city": "Erode",
+   "district": "Erode",
+   "state": "Tamil Nadu",
+   "affiliation": ""
+  },
+  {
+   "id": "kongu-engineering-college",
+   "name": "Kongu Engineering College",
+   "kind": "college",
+   "type": "Engineering College",
+   "city": "Perundurai",
+   "district": "Erode",
+   "state": "Tamil Nadu",
+   "affiliation": ""
+  },
+  {
+   "id": "kpr-institute-of-engineering-and-technology",
+   "name": "KPR Institute of Engineering and Technology",
+   "kind": "college",
+   "type": "Engineering College",
+   "city": "Coimbatore",
+   "district": "Coimbatore",
+   "state": "Tamil Nadu",
+   "affiliation": ""
+  },
+  {
+   "id": "kumaraguru-college-of-liberal-arts-and-science",
+   "name": "Kumaraguru College of Liberal Arts and Science",
+   "kind": "college",
+   "type": "Arts & Science College",
+   "city": "Coimbatore",
+   "district": "Coimbatore",
+   "state": "Tamil Nadu",
+   "affiliation": ""
+  },
+  {
+   "id": "kumaraguru-college-of-technology",
+   "name": "Kumaraguru College of Technology",
+   "kind": "college",
+   "type": "Engineering College",
+   "city": "Coimbatore",
+   "district": "Coimbatore",
+   "state": "Tamil Nadu",
+   "affiliation": ""
+  },
+  {
+   "id": "kv-institute-of-management-and-information-studies",
+   "name": "KV Institute of Management and Information Studies",
+   "kind": "college",
+   "type": "Management Institute",
+   "city": "Coimbatore",
+   "district": "Coimbatore",
+   "state": "Tamil Nadu",
+   "affiliation": ""
+  },
+  {
+   "id": "lady-doak-college",
+   "name": "Lady Doak College",
+   "kind": "college",
+   "type": "Arts & Science College",
+   "city": "Madurai",
+   "district": "Madurai",
+   "state": "Tamil Nadu",
+   "affiliation": ""
+  },
+  {
+   "id": "loyola-college",
+   "name": "Loyola College",
+   "kind": "college",
+   "type": "Arts & Science College",
+   "city": "Chennai",
+   "district": "Chennai",
+   "state": "Tamil Nadu",
+   "affiliation": ""
+  },
+  {
+   "id": "loyola-institute-of-business-administration",
+   "name": "Loyola Institute of Business Administration",
+   "kind": "college",
+   "type": "Management Institute",
+   "city": "Chennai",
+   "district": "Chennai",
+   "state": "Tamil Nadu",
+   "affiliation": ""
+  },
+  {
+   "id": "m-kumarasamy-college-of-engineering",
+   "name": "M. Kumarasamy College of Engineering",
+   "kind": "college",
+   "type": "Engineering College",
+   "city": "Karur",
+   "district": "Karur",
+   "state": "Tamil Nadu",
+   "affiliation": ""
+  },
+  {
+   "id": "m-a-m-college-of-engineering-and-technology",
+   "name": "M.A.M. College of Engineering and Technology",
+   "kind": "college",
+   "type": "Engineering College",
+   "city": "Tiruchirappalli",
+   "district": "Tiruchirappalli",
+   "state": "Tamil Nadu",
+   "affiliation": ""
+  },
+  {
+   "id": "madras-christian-college",
+   "name": "Madras Christian College",
+   "kind": "college",
+   "type": "Arts & Science College",
+   "city": "Chennai",
+   "district": "Chengalpattu",
+   "state": "Tamil Nadu",
+   "affiliation": ""
+  },
+  {
+   "id": "madras-institute-of-development-studies",
+   "name": "Madras Institute of Development Studies",
+   "kind": "national",
+   "type": "Research Institute",
+   "city": "Chennai",
+   "district": "Chennai",
+   "state": "Tamil Nadu",
+   "affiliation": ""
+  },
+  {
+   "id": "madras-institute-of-technology",
+   "name": "Madras Institute of Technology",
+   "kind": "college",
+   "type": "Engineering College",
+   "city": "Chennai",
+   "district": "Chengalpattu",
+   "state": "Tamil Nadu",
+   "affiliation": ""
+  },
+  {
+   "id": "madras-medical-college",
+   "name": "Madras Medical College",
+   "kind": "college",
+   "type": "Medical College",
+   "city": "Chennai",
+   "district": "Chennai",
+   "state": "Tamil Nadu",
+   "affiliation": ""
+  },
+  {
+   "id": "madras-school-of-economics",
+   "name": "Madras School of Economics",
+   "kind": "national",
+   "type": "Research Institute",
+   "city": "Chennai",
+   "district": "Chennai",
+   "state": "Tamil Nadu",
+   "affiliation": ""
+  },
+  {
+   "id": "madurai-kamaraj-university",
+   "name": "Madurai Kamaraj University",
+   "kind": "state",
+   "type": "State University",
+   "city": "Madurai",
+   "district": "Madurai",
+   "state": "Tamil Nadu",
+   "affiliation": ""
+  },
+  {
+   "id": "madurai-medical-college",
+   "name": "Madurai Medical College",
+   "kind": "college",
+   "type": "Medical College",
+   "city": "Madurai",
+   "district": "Madurai",
+   "state": "Tamil Nadu",
+   "affiliation": ""
+  },
+  {
+   "id": "mahendra-engineering-college",
+   "name": "Mahendra Engineering College",
+   "kind": "college",
+   "type": "Engineering College",
+   "city": "Mallasamudram",
+   "district": "Namakkal",
+   "state": "Tamil Nadu",
+   "affiliation": ""
+  },
+  {
+   "id": "mailam-engineering-college",
+   "name": "Mailam Engineering College",
+   "kind": "college",
+   "type": "Engineering College",
+   "city": "Mailam",
+   "district": "Villupuram",
+   "state": "Tamil Nadu",
+   "affiliation": ""
+  },
+  {
+   "id": "manonmaniam-sundaranar-university",
+   "name": "Manonmaniam Sundaranar University",
+   "kind": "state",
+   "type": "State University",
+   "city": "Tirunelveli",
+   "district": "Tirunelveli",
+   "state": "Tamil Nadu",
+   "affiliation": ""
+  },
+  {
+   "id": "marthandam-college-of-engineering-and-technology",
+   "name": "Marthandam College of Engineering and Technology",
+   "kind": "college",
+   "type": "Engineering College",
+   "city": "Marthandam",
+   "district": "Kanyakumari",
+   "state": "Tamil Nadu",
+   "affiliation": ""
+  },
+  {
+   "id": "meenakshi-academy-of-higher-education-and-research",
+   "name": "Meenakshi Academy of Higher Education and Research",
+   "kind": "deemed",
+   "type": "Deemed University",
+   "city": "Chennai",
+   "district": "Chennai",
+   "state": "Tamil Nadu",
+   "affiliation": ""
+  },
+  {
+   "id": "mepco-schlenk-engineering-college",
+   "name": "Mepco Schlenk Engineering College",
+   "kind": "college",
+   "type": "Engineering College",
+   "city": "Sivakasi",
+   "district": "Virudhunagar",
+   "state": "Tamil Nadu",
+   "affiliation": ""
+  },
+  {
+   "id": "mother-teresa-women-s-university",
+   "name": "Mother Teresa Women's University",
+   "kind": "state",
+   "type": "State University",
+   "city": "Kodaikanal",
+   "district": "Dindigul",
+   "state": "Tamil Nadu",
+   "affiliation": ""
+  },
+  {
+   "id": "mount-zion-college-of-engineering-and-technology",
+   "name": "Mount Zion College of Engineering and Technology",
+   "kind": "college",
+   "type": "Engineering College",
+   "city": "Pudukkottai",
+   "district": "Pudukkottai",
+   "state": "Tamil Nadu",
+   "affiliation": ""
+  },
+  {
+   "id": "nallamuthu-gounder-mahalingam-college",
+   "name": "Nallamuthu Gounder Mahalingam College",
+   "kind": "college",
+   "type": "Arts & Science College",
+   "city": "Pollachi",
+   "district": "Coimbatore",
+   "state": "Tamil Nadu",
+   "affiliation": ""
+  },
+  {
+   "id": "national-college-tiruchirappalli",
+   "name": "National College, Tiruchirappalli",
+   "kind": "college",
+   "type": "Arts & Science College",
+   "city": "Tiruchirappalli",
+   "district": "Tiruchirappalli",
+   "state": "Tamil Nadu",
+   "affiliation": ""
+  },
+  {
+   "id": "national-institute-of-fashion-technology-chennai",
+   "name": "National Institute of Fashion Technology, Chennai",
+   "kind": "national",
+   "type": "Research Institute",
+   "city": "Chennai",
+   "district": "Chennai",
+   "state": "Tamil Nadu",
+   "affiliation": ""
+  },
+  {
+   "id": "national-institute-of-food-technology-entrepreneurship-and-m",
+   "name": "National Institute of Food Technology, Entrepreneurship and Management, Thanjavur",
+   "kind": "national",
+   "type": "National Institute",
+   "city": "Thanjavur",
+   "district": "Thanjavur",
+   "state": "Tamil Nadu",
+   "affiliation": ""
+  },
+  {
+   "id": "national-institute-of-siddha",
+   "name": "National Institute of Siddha",
+   "kind": "national",
+   "type": "Research Institute",
+   "city": "Chennai",
+   "district": "Chennai",
+   "state": "Tamil Nadu",
+   "affiliation": ""
+  },
+  {
+   "id": "national-institute-of-technology-tiruchirappalli",
+   "name": "National Institute of Technology, Tiruchirappalli",
+   "kind": "national",
+   "type": "National Institute",
+   "city": "Tiruchirappalli",
+   "district": "Tiruchirappalli",
+   "state": "Tamil Nadu",
+   "affiliation": ""
+  },
+  {
+   "id": "nmv-university",
+   "name": "NMV University",
+   "kind": "private",
+   "type": "Private University",
+   "city": "Aruppukottai",
+   "district": "Virudhunagar",
+   "state": "Tamil Nadu",
+   "affiliation": ""
+  },
+  {
+   "id": "noorul-islam-centre-for-higher-education",
+   "name": "Noorul Islam Centre for Higher Education",
+   "kind": "deemed",
+   "type": "Deemed University",
+   "city": "Kumaracoil",
+   "district": "Kanyakumari",
+   "state": "Tamil Nadu",
+   "affiliation": ""
+  },
+  {
+   "id": "paavai-engineering-college",
+   "name": "Paavai Engineering College",
+   "kind": "college",
+   "type": "Engineering College",
+   "city": "Namakkal",
+   "district": "Namakkal",
+   "state": "Tamil Nadu",
+   "affiliation": ""
+  },
+  {
+   "id": "pachaiyappa-s-college",
+   "name": "Pachaiyappa's College",
+   "kind": "college",
+   "type": "Arts & Science College",
+   "city": "Chennai",
+   "district": "Chennai",
+   "state": "Tamil Nadu",
+   "affiliation": ""
+  },
+  {
+   "id": "parisutham-institute-of-technology-science",
+   "name": "Parisutham Institute of Technology & Science",
+   "kind": "college",
+   "type": "Engineering College",
+   "city": "Thanjavur",
+   "district": "Thanjavur",
+   "state": "Tamil Nadu",
+   "affiliation": ""
+  },
+  {
+   "id": "periyar-maniammai-institute-of-science-technology",
+   "name": "Periyar Maniammai Institute of Science & Technology",
+   "kind": "deemed",
+   "type": "Deemed University",
+   "city": "Thanjavur",
+   "district": "Thanjavur",
+   "state": "Tamil Nadu",
+   "affiliation": ""
+  },
+  {
+   "id": "periyar-university",
+   "name": "Periyar University",
+   "kind": "state",
+   "type": "State University",
+   "city": "Salem",
+   "district": "Salem",
+   "state": "Tamil Nadu",
+   "affiliation": ""
+  },
+  {
+   "id": "ponnaiyah-ramajayam-institute-of-science-and-technology-pris",
+   "name": "Ponnaiyah Ramajayam Institute of Science and Technology (PRIST)",
+   "kind": "deemed",
+   "type": "Deemed University",
+   "city": "Thanjavur",
+   "district": "Thanjavur",
+   "state": "Tamil Nadu",
+   "affiliation": ""
+  },
+  {
+   "id": "presidency-college",
+   "name": "Presidency College",
+   "kind": "college",
+   "type": "Arts & Science College",
+   "city": "Chennai",
+   "district": "Chennai",
+   "state": "Tamil Nadu",
+   "affiliation": ""
+  },
+  {
+   "id": "psg-college-of-arts-and-science",
+   "name": "PSG College of Arts and Science",
+   "kind": "college",
+   "type": "Arts & Science College",
+   "city": "Coimbatore",
+   "district": "Coimbatore",
+   "state": "Tamil Nadu",
+   "affiliation": ""
+  },
+  {
+   "id": "psg-college-of-technology",
+   "name": "PSG College of Technology",
+   "kind": "college",
+   "type": "Engineering College",
+   "city": "Coimbatore",
+   "district": "Coimbatore",
+   "state": "Tamil Nadu",
+   "affiliation": ""
+  },
+  {
+   "id": "queen-mary-s-college",
+   "name": "Queen Mary's College",
+   "kind": "college",
+   "type": "Arts & Science College",
+   "city": "Chennai",
+   "district": "Chennai",
+   "state": "Tamil Nadu",
+   "affiliation": ""
+  },
+  {
+   "id": "r-m-d-engineering-college",
+   "name": "R.M.D. Engineering College",
+   "kind": "college",
+   "type": "Engineering College",
+   "city": "Kavaraipettai",
+   "district": "Tiruvallur",
+   "state": "Tamil Nadu",
+   "affiliation": ""
+  },
+  {
+   "id": "r-m-k-college-of-engineering-and-technology",
+   "name": "R.M.K. College of Engineering and Technology",
+   "kind": "college",
+   "type": "Engineering College",
+   "city": "Puduvoyal",
+   "district": "Tiruvallur",
+   "state": "Tamil Nadu",
+   "affiliation": ""
+  },
+  {
+   "id": "r-m-k-engineering-college",
+   "name": "R.M.K. Engineering College",
+   "kind": "college",
+   "type": "Engineering College",
+   "city": "Kavaraipettai",
+   "district": "Tiruvallur",
+   "state": "Tamil Nadu",
+   "affiliation": ""
+  },
+  {
+   "id": "rajalakshmi-engineering-college",
+   "name": "Rajalakshmi Engineering College",
+   "kind": "college",
+   "type": "Engineering College",
+   "city": "Chennai",
+   "district": "Kancheepuram",
+   "state": "Tamil Nadu",
+   "affiliation": ""
+  },
+  {
+   "id": "rajiv-gandhi-national-institute-of-youth-development",
+   "name": "Rajiv Gandhi National Institute of Youth Development",
+   "kind": "national",
+   "type": "National Institute",
+   "city": "Sriperumbudur",
+   "district": "Kancheepuram",
+   "state": "Tamil Nadu",
+   "affiliation": ""
+  },
+  {
+   "id": "rathinam-college-of-arts-and-science",
+   "name": "Rathinam College of Arts and Science",
+   "kind": "college",
+   "type": "Arts & Science College",
+   "city": "Coimbatore",
+   "district": "Coimbatore",
+   "state": "Tamil Nadu",
+   "affiliation": ""
+  },
+  {
+   "id": "rathinam-technical-campus",
+   "name": "Rathinam Technical Campus",
+   "kind": "college",
+   "type": "Engineering College",
+   "city": "Coimbatore",
+   "district": "Coimbatore",
+   "state": "Tamil Nadu",
+   "affiliation": ""
+  },
+  {
+   "id": "s-a-engineering-college",
+   "name": "S.A. Engineering College",
+   "kind": "college",
+   "type": "Engineering College",
+   "city": "Chennai",
+   "district": "Tiruvallur",
+   "state": "Tamil Nadu",
+   "affiliation": ""
+  },
+  {
+   "id": "sacred-heart-college-tirupattur",
+   "name": "Sacred Heart College, Tirupattur",
+   "kind": "college",
+   "type": "Arts & Science College",
+   "city": "Tirupattur",
+   "district": "Tirupattur",
+   "state": "Tamil Nadu",
+   "affiliation": ""
+  },
+  {
+   "id": "sai-university",
+   "name": "Sai University",
+   "kind": "private",
+   "type": "Private University",
+   "city": "Chennai",
+   "district": "Chengalpattu",
+   "state": "Tamil Nadu",
+   "affiliation": ""
+  },
+  {
+   "id": "sardar-vallabhbhai-patel-international-school-of-textiles-ma",
+   "name": "Sardar Vallabhbhai Patel International School of Textiles & Management",
+   "kind": "national",
+   "type": "Research Institute",
+   "city": "Coimbatore",
+   "district": "Coimbatore",
+   "state": "Tamil Nadu",
+   "affiliation": ""
+  },
+  {
+   "id": "sastra-deemed-university",
+   "name": "SASTRA Deemed University",
+   "kind": "deemed",
+   "type": "Deemed University",
+   "city": "Thanjavur",
+   "district": "Thanjavur",
+   "state": "Tamil Nadu",
+   "affiliation": ""
+  },
+  {
+   "id": "sathyabama-institute-of-science-and-technology",
+   "name": "Sathyabama Institute of Science and Technology",
+   "kind": "deemed",
+   "type": "Deemed University",
+   "city": "Chennai",
+   "district": "Chennai",
+   "state": "Tamil Nadu",
+   "affiliation": ""
+  },
+  {
+   "id": "saveetha-institute-of-medical-and-technical-sciences-simats",
+   "name": "Saveetha Institute of Medical and Technical Sciences (SIMATS)",
+   "kind": "deemed",
+   "type": "Deemed University",
+   "city": "Chennai",
+   "district": "Chennai",
+   "state": "Tamil Nadu",
+   "affiliation": ""
+  },
+  {
+   "id": "scott-christian-college",
+   "name": "Scott Christian College",
+   "kind": "college",
+   "type": "Arts & Science College",
+   "city": "Nagercoil",
+   "district": "Kanyakumari",
+   "state": "Tamil Nadu",
+   "affiliation": ""
+  },
+  {
+   "id": "shiv-nadar-university-chennai",
+   "name": "Shiv Nadar University Chennai",
+   "kind": "private",
+   "type": "Private University",
+   "city": "Kalavakkam",
+   "district": "Chengalpattu",
+   "state": "Tamil Nadu",
+   "affiliation": ""
+  },
+  {
+   "id": "sona-college-of-technology",
+   "name": "Sona College of Technology",
+   "kind": "college",
+   "type": "Engineering College",
+   "city": "Salem",
+   "district": "Salem",
+   "state": "Tamil Nadu",
+   "affiliation": ""
+  },
+  {
+   "id": "sri-chandrasekharendra-saraswathi-viswa-mahavidyalaya-scsvmv",
+   "name": "Sri Chandrasekharendra Saraswathi Viswa Mahavidyalaya (SCSVMV)",
+   "kind": "deemed",
+   "type": "Deemed University",
+   "city": "Kancheepuram",
+   "district": "Kancheepuram",
+   "state": "Tamil Nadu",
+   "affiliation": ""
+  },
+  {
+   "id": "sri-krishna-college-of-engineering-technology",
+   "name": "Sri Krishna College of Engineering & Technology",
+   "kind": "college",
+   "type": "Engineering College",
+   "city": "Coimbatore",
+   "district": "Coimbatore",
+   "state": "Tamil Nadu",
+   "affiliation": ""
+  },
+  {
+   "id": "sri-parasakthi-college-for-women",
+   "name": "Sri Parasakthi College for Women",
+   "kind": "college",
+   "type": "Arts & Science College",
+   "city": "Courtallam",
+   "district": "Tenkasi",
+   "state": "Tamil Nadu",
+   "affiliation": ""
+  },
+  {
+   "id": "sri-ramachandra-institute-of-higher-education-and-research",
+   "name": "Sri Ramachandra Institute of Higher Education and Research",
+   "kind": "deemed",
+   "type": "Deemed University",
+   "city": "Chennai",
+   "district": "Chennai",
+   "state": "Tamil Nadu",
+   "affiliation": ""
+  },
+  {
+   "id": "sri-ramakrishna-engineering-college",
+   "name": "Sri Ramakrishna Engineering College",
+   "kind": "college",
+   "type": "Engineering College",
+   "city": "Coimbatore",
+   "district": "Coimbatore",
+   "state": "Tamil Nadu",
+   "affiliation": ""
+  },
+  {
+   "id": "sri-sairam-engineering-college",
+   "name": "Sri Sairam Engineering College",
+   "kind": "college",
+   "type": "Engineering College",
+   "city": "Chennai",
+   "district": "Chengalpattu",
+   "state": "Tamil Nadu",
+   "affiliation": ""
+  },
+  {
+   "id": "sri-venkateswara-college-of-engineering",
+   "name": "Sri Venkateswara College of Engineering",
+   "kind": "college",
+   "type": "Engineering College",
+   "city": "Sriperumbudur",
+   "district": "Kancheepuram",
+   "state": "Tamil Nadu",
+   "affiliation": ""
+  },
+  {
+   "id": "sri-venkateswaraa-university",
+   "name": "Sri Venkateswaraa University",
+   "kind": "private",
+   "type": "Private University",
+   "city": "Thoothukudi",
+   "district": "Thoothukudi",
+   "state": "Tamil Nadu",
+   "affiliation": ""
+  },
+  {
+   "id": "srm-institute-of-science-and-technology",
+   "name": "SRM Institute of Science and Technology",
+   "kind": "deemed",
+   "type": "Deemed University",
+   "city": "Kattankulathur",
+   "district": "Chengalpattu",
+   "state": "Tamil Nadu",
+   "affiliation": ""
+  },
+  {
+   "id": "srm-valliammai-engineering-college",
+   "name": "SRM Valliammai Engineering College",
+   "kind": "college",
+   "type": "Engineering College",
+   "city": "Kattankulathur",
+   "district": "Chengalpattu",
+   "state": "Tamil Nadu",
+   "affiliation": ""
+  },
+  {
+   "id": "ssn-college-of-engineering",
+   "name": "SSN College of Engineering",
+   "kind": "college",
+   "type": "Engineering College",
+   "city": "Kalavakkam",
+   "district": "Chengalpattu",
+   "state": "Tamil Nadu",
+   "affiliation": ""
+  },
+  {
+   "id": "st-joseph-university",
+   "name": "St. Joseph University",
+   "kind": "private",
+   "type": "Private University",
+   "city": "Tindivanam",
+   "district": "Villupuram",
+   "state": "Tamil Nadu",
+   "affiliation": ""
+  },
+  {
+   "id": "st-joseph-s-college-of-engineering",
+   "name": "St. Joseph's College of Engineering",
+   "kind": "college",
+   "type": "Engineering College",
+   "city": "Chennai",
+   "district": "Chennai",
+   "state": "Tamil Nadu",
+   "affiliation": ""
+  },
+  {
+   "id": "st-joseph-s-college-tiruchirappalli",
+   "name": "St. Joseph's College, Tiruchirappalli",
+   "kind": "college",
+   "type": "Arts & Science College",
+   "city": "Tiruchirappalli",
+   "district": "Tiruchirappalli",
+   "state": "Tamil Nadu",
+   "affiliation": ""
+  },
+  {
+   "id": "st-peter-s-college-of-engineering-and-technology",
+   "name": "St. Peter's College of Engineering and Technology",
+   "kind": "college",
+   "type": "Engineering College",
+   "city": "Chennai",
+   "district": "Tiruvallur",
+   "state": "Tamil Nadu",
+   "affiliation": ""
+  },
+  {
+   "id": "st-peter-s-institute-of-higher-education-and-research",
+   "name": "St. Peter's Institute of Higher Education and Research",
+   "kind": "deemed",
+   "type": "Deemed University",
+   "city": "Chennai",
+   "district": "Chennai",
+   "state": "Tamil Nadu",
+   "affiliation": ""
+  },
+  {
+   "id": "st-xavier-s-college-palayamkottai",
+   "name": "St. Xavier's College, Palayamkottai",
+   "kind": "college",
+   "type": "Arts & Science College",
+   "city": "Palayamkottai",
+   "district": "Tirunelveli",
+   "state": "Tamil Nadu",
+   "affiliation": ""
+  },
+  {
+   "id": "stanley-medical-college",
+   "name": "Stanley Medical College",
+   "kind": "college",
+   "type": "Medical College",
+   "city": "Chennai",
+   "district": "Chennai",
+   "state": "Tamil Nadu",
+   "affiliation": ""
+  },
+  {
+   "id": "stella-maris-college",
+   "name": "Stella Maris College",
+   "kind": "college",
+   "type": "Arts & Science College",
+   "city": "Chennai",
+   "district": "Chennai",
+   "state": "Tamil Nadu",
+   "affiliation": ""
+  },
+  {
+   "id": "takshashila-university",
+   "name": "Takshashila University",
+   "kind": "private",
+   "type": "Private University",
+   "city": "Tindivanam",
+   "district": "Villupuram",
+   "state": "Tamil Nadu",
+   "affiliation": ""
+  },
+  {
+   "id": "tamil-nadu-agricultural-university",
+   "name": "Tamil Nadu Agricultural University",
+   "kind": "state",
+   "type": "State University",
+   "city": "Coimbatore",
+   "district": "Coimbatore",
+   "state": "Tamil Nadu",
+   "affiliation": ""
+  },
+  {
+   "id": "tamil-nadu-dr-j-jayalalithaa-fisheries-university",
+   "name": "Tamil Nadu Dr. J. Jayalalithaa Fisheries University",
+   "kind": "state",
+   "type": "State University",
+   "city": "Nagapattinam",
+   "district": "Nagapattinam",
+   "state": "Tamil Nadu",
+   "affiliation": ""
+  },
+  {
+   "id": "tamil-nadu-national-law-university",
+   "name": "Tamil Nadu National Law University",
+   "kind": "state",
+   "type": "State University",
+   "city": "Tiruchirappalli",
+   "district": "Tiruchirappalli",
+   "state": "Tamil Nadu",
+   "affiliation": ""
+  },
+  {
+   "id": "tamil-nadu-open-university",
+   "name": "Tamil Nadu Open University",
+   "kind": "state",
+   "type": "State University",
+   "city": "Chennai",
+   "district": "Chennai",
+   "state": "Tamil Nadu",
+   "affiliation": ""
+  },
+  {
+   "id": "tamil-nadu-physical-education-and-sports-university",
+   "name": "Tamil Nadu Physical Education and Sports University",
+   "kind": "state",
+   "type": "State University",
+   "city": "Chennai",
+   "district": "Chennai",
+   "state": "Tamil Nadu",
+   "affiliation": ""
+  },
+  {
+   "id": "tamil-nadu-teachers-education-university",
+   "name": "Tamil Nadu Teachers Education University",
+   "kind": "state",
+   "type": "State University",
+   "city": "Chennai",
+   "district": "Chennai",
+   "state": "Tamil Nadu",
+   "affiliation": ""
+  },
+  {
+   "id": "tamil-nadu-veterinary-and-animal-sciences-university",
+   "name": "Tamil Nadu Veterinary and Animal Sciences University",
+   "kind": "state",
+   "type": "State University",
+   "city": "Chennai",
+   "district": "Chennai",
+   "state": "Tamil Nadu",
+   "affiliation": ""
+  },
+  {
+   "id": "tamil-university",
+   "name": "Tamil University",
+   "kind": "state",
+   "type": "State University",
+   "city": "Thanjavur",
+   "district": "Thanjavur",
+   "state": "Tamil Nadu",
+   "affiliation": ""
+  },
+  {
+   "id": "thanjavur-medical-college",
+   "name": "Thanjavur Medical College",
+   "kind": "college",
+   "type": "Medical College",
+   "city": "Thanjavur",
+   "district": "Thanjavur",
+   "state": "Tamil Nadu",
+   "affiliation": ""
+  },
+  {
+   "id": "the-american-college",
+   "name": "The American College",
+   "kind": "college",
+   "type": "Arts & Science College",
+   "city": "Madurai",
+   "district": "Madurai",
+   "state": "Tamil Nadu",
+   "affiliation": ""
+  },
+  {
+   "id": "the-gandhigram-rural-institute",
+   "name": "The Gandhigram Rural Institute",
+   "kind": "deemed",
+   "type": "Deemed University",
+   "city": "Dindigul",
+   "district": "Dindigul",
+   "state": "Tamil Nadu",
+   "affiliation": ""
+  },
+  {
+   "id": "the-new-college",
+   "name": "The New College",
+   "kind": "college",
+   "type": "Arts & Science College",
+   "city": "Chennai",
+   "district": "Chennai",
+   "state": "Tamil Nadu",
+   "affiliation": ""
+  },
+  {
+   "id": "the-tamil-nadu-dr-ambedkar-law-university",
+   "name": "The Tamil Nadu Dr. Ambedkar Law University",
+   "kind": "state",
+   "type": "State University",
+   "city": "Chennai",
+   "district": "Chennai",
+   "state": "Tamil Nadu",
+   "affiliation": ""
+  },
+  {
+   "id": "the-tamil-nadu-dr-j-jayalalithaa-music-and-fine-arts-univers",
+   "name": "The Tamil Nadu Dr. J. Jayalalithaa Music and Fine Arts University",
+   "kind": "state",
+   "type": "State University",
+   "city": "Chennai",
+   "district": "Chennai",
+   "state": "Tamil Nadu",
+   "affiliation": ""
+  },
+  {
+   "id": "the-tamil-nadu-dr-m-g-r-medical-university",
+   "name": "The Tamil Nadu Dr. M.G.R. Medical University",
+   "kind": "state",
+   "type": "State University",
+   "city": "Chennai",
+   "district": "Chennai",
+   "state": "Tamil Nadu",
+   "affiliation": ""
+  },
+  {
+   "id": "thiagarajar-college-of-engineering",
+   "name": "Thiagarajar College of Engineering",
+   "kind": "college",
+   "type": "Engineering College",
+   "city": "Madurai",
+   "district": "Madurai",
+   "state": "Tamil Nadu",
+   "affiliation": ""
+  },
+  {
+   "id": "thiagarajar-school-of-management",
+   "name": "Thiagarajar School of Management",
+   "kind": "college",
+   "type": "Management Institute",
+   "city": "Madurai",
+   "district": "Madurai",
+   "state": "Tamil Nadu",
+   "affiliation": ""
+  },
+  {
+   "id": "thiruthangal-nadar-college",
+   "name": "Thiruthangal Nadar College",
+   "kind": "college",
+   "type": "Arts & Science College",
+   "city": "Chennai",
+   "district": "Chennai",
+   "state": "Tamil Nadu",
+   "affiliation": ""
+  },
+  {
+   "id": "thiruvalluvar-university",
+   "name": "Thiruvalluvar University",
+   "kind": "state",
+   "type": "State University",
+   "city": "Vellore",
+   "district": "Vellore",
+   "state": "Tamil Nadu",
+   "affiliation": ""
+  },
+  {
+   "id": "tirunelveli-medical-college",
+   "name": "Tirunelveli Medical College",
+   "kind": "college",
+   "type": "Medical College",
+   "city": "Tirunelveli",
+   "district": "Tirunelveli",
+   "state": "Tamil Nadu",
+   "affiliation": ""
+  },
+  {
+   "id": "university-college-of-engineering-kancheepuram",
+   "name": "University College of Engineering, Kancheepuram",
+   "kind": "college",
+   "type": "Engineering College",
+   "city": "Kancheepuram",
+   "district": "Kancheepuram",
+   "state": "Tamil Nadu",
+   "affiliation": ""
+  },
+  {
+   "id": "university-of-madras",
+   "name": "University of Madras",
+   "kind": "state",
+   "type": "State University",
+   "city": "Chennai",
+   "district": "Chennai",
+   "state": "Tamil Nadu",
+   "affiliation": ""
+  },
+  {
+   "id": "v-o-chidambaranar-agricultural-college-and-research-institut",
+   "name": "V.O. Chidambaranar Agricultural College and Research Institute, Killikulam",
+   "kind": "college",
+   "type": "Agricultural College",
+   "city": "Killikulam",
+   "district": "Thoothukudi",
+   "state": "Tamil Nadu",
+   "affiliation": ""
+  },
+  {
+   "id": "vel-tech-rangarajan-dr-sagunthala-r-d-institute-of-science-a",
+   "name": "Vel Tech Rangarajan Dr. Sagunthala R&D Institute of Science and Technology",
+   "kind": "deemed",
+   "type": "Deemed University",
+   "city": "Chennai",
+   "district": "Tiruvallur",
+   "state": "Tamil Nadu",
+   "affiliation": ""
+  },
+  {
+   "id": "velalar-college-of-engineering-and-technology",
+   "name": "Velalar College of Engineering and Technology",
+   "kind": "college",
+   "type": "Engineering College",
+   "city": "Erode",
+   "district": "Erode",
+   "state": "Tamil Nadu",
+   "affiliation": ""
+  },
+  {
+   "id": "velammal-college-of-engineering-and-technology",
+   "name": "Velammal College of Engineering and Technology",
+   "kind": "college",
+   "type": "Engineering College",
+   "city": "Madurai",
+   "district": "Madurai",
+   "state": "Tamil Nadu",
+   "affiliation": ""
+  },
+  {
+   "id": "velammal-engineering-college",
+   "name": "Velammal Engineering College",
+   "kind": "college",
+   "type": "Engineering College",
+   "city": "Chennai",
+   "district": "Chennai",
+   "state": "Tamil Nadu",
+   "affiliation": ""
+  },
+  {
+   "id": "vellore-institute-of-technology-vit",
+   "name": "Vellore Institute of Technology (VIT)",
+   "kind": "deemed",
+   "type": "Deemed University",
+   "city": "Vellore",
+   "district": "Vellore",
+   "state": "Tamil Nadu",
+   "affiliation": ""
+  },
+  {
+   "id": "vels-institute-of-science-technology-advanced-studies-vistas",
+   "name": "Vels Institute of Science, Technology & Advanced Studies (VISTAS)",
+   "kind": "deemed",
+   "type": "Deemed University",
+   "city": "Chennai",
+   "district": "Chennai",
+   "state": "Tamil Nadu",
+   "affiliation": ""
+  },
+  {
+   "id": "vickram-college-of-engineering",
+   "name": "Vickram College of Engineering",
+   "kind": "college",
+   "type": "Engineering College",
+   "city": "Enathi",
+   "district": "Sivaganga",
+   "state": "Tamil Nadu",
+   "affiliation": ""
+  },
+  {
+   "id": "vidhyaa-giri-college-of-arts-and-science",
+   "name": "Vidhyaa Giri College of Arts and Science",
+   "kind": "college",
+   "type": "Arts & Science College",
+   "city": "Karaikudi",
+   "district": "Sivaganga",
+   "state": "Tamil Nadu",
+   "affiliation": ""
+  },
+  {
+   "id": "vinayaka-mission-s-research-foundation",
+   "name": "Vinayaka Mission's Research Foundation",
+   "kind": "deemed",
+   "type": "Deemed University",
+   "city": "Salem",
+   "district": "Salem",
+   "state": "Tamil Nadu",
+   "affiliation": ""
+  },
+  {
+   "id": "women-s-christian-college",
+   "name": "Women's Christian College",
+   "kind": "college",
+   "type": "Arts & Science College",
+   "city": "Chennai",
+   "district": "Chennai",
+   "state": "Tamil Nadu",
+   "affiliation": ""
+  }
+ ],
+ "GEOGRAPHY": {
+  "Tamil Nadu": {
+   "Ariyalur": [
+    "Ariyalur"
+   ],
+   "Chengalpattu": [
+    "Chengalpattu",
+    "Chennai",
+    "Kalavakkam",
+    "Kattankulathur",
+    "Kelambakkam"
+   ],
+   "Chennai": [
+    "Chennai"
+   ],
+   "Coimbatore": [
+    "Coimbatore",
+    "Mettupalayam",
+    "Pollachi"
+   ],
+   "Cuddalore": [
+    "Chidambaram"
+   ],
+   "Dharmapuri": [
+    "Dharmapuri"
+   ],
+   "Dindigul": [
+    "Dindigul",
+    "Kodaikanal"
+   ],
+   "Erode": [
+    "Erode",
+    "Perundurai",
+    "Sathyamangalam"
+   ],
+   "Kallakurichi": [
+    "Kallakurichi"
+   ],
+   "Kancheepuram": [
+    "Chennai",
+    "Kancheepuram",
+    "Sriperumbudur"
+   ],
+   "Kanyakumari": [
+    "Kumaracoil",
+    "Marthandam",
+    "Nagercoil"
+   ],
+   "Karur": [
+    "Karur"
+   ],
+   "Krishnagiri": [
+    "Krishnagiri",
+    "Paiyur"
+   ],
+   "Madurai": [
+    "Madurai"
+   ],
+   "Nagapattinam": [
+    "Keezhvelur",
+    "Nagapattinam"
+   ],
+   "Namakkal": [
+    "Komarapalayam",
+    "Mallasamudram",
+    "Namakkal"
+   ],
+   "Pudukkottai": [
+    "Kudumiyanmalai",
+    "Pudukkottai"
+   ],
+   "Ramanathapuram": [
+    "Ramanathapuram"
+   ],
+   "Salem": [
+    "Salem"
+   ],
+   "Sivaganga": [
+    "Chettinad",
+    "Enathi",
+    "Karaikudi",
+    "Madurai",
+    "Sivaganga"
+   ],
+   "Tenkasi": [
+    "Courtallam"
+   ],
+   "Thanjavur": [
+    "Eachangottai",
+    "Poondi",
+    "Thanjavur"
+   ],
+   "The Nilgiris": [
+    "Udhagamandalam"
+   ],
+   "Theni": [
+    "Kullapuram",
+    "Periyakulam",
+    "Theni"
+   ],
+   "Thoothukudi": [
+    "Killikulam",
+    "Thoothukudi",
+    "Tiruchendur"
+   ],
+   "Tiruchirappalli": [
+    "Kumulur",
+    "Tiruchirappalli"
+   ],
+   "Tirunelveli": [
+    "Palayamkottai",
+    "Tirunelveli"
+   ],
+   "Tirupattur": [
+    "Tirupattur"
+   ],
+   "Tiruppur": [
+    "Tiruppur"
+   ],
+   "Tiruvallur": [
+    "Chennai",
+    "Kavaraipettai",
+    "Puduvoyal",
+    "Tiruvallur"
+   ],
+   "Tiruvannamalai": [
+    "Tiruvannamalai",
+    "Vazhavachanur"
+   ],
+   "Tiruvarur": [
+    "Tiruvarur"
+   ],
+   "Vellore": [
+    "Vellore"
+   ],
+   "Villupuram": [
+    "Mailam",
+    "Tindivanam",
+    "Villupuram"
+   ],
+   "Virudhunagar": [
+    "Aruppukottai",
+    "Krishnankoil",
+    "Sivakasi",
+    "Virudhunagar"
+   ]
+  }
+ },
+ "KIND_LABELS": {
+  "state": "State university",
+  "central": "Central university",
+  "deemed": "Deemed university",
+  "private": "Private university",
+  "national": "National / research institute",
+  "college": "College"
+ },
+ "INSTITUTION_NOTE": "Starter catalogue of Tamil Nadu universities and colleges (source: Wikipedia list of institutions of higher education in Tamil Nadu). Not every affiliated college is included - choose 'My college is not listed' if yours is missing."
 };

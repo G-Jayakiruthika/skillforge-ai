@@ -3,16 +3,17 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com data:; img-src 'self' data: blob:; media-src 'self' blob:; connect-src 'self'; object-src 'none'; base-uri 'self'; form-action 'self'" />
+  <meta name="referrer" content="no-referrer" />
   <title>SkillForge AI - Forge your career with 8 AI agents</title>
   <meta name="description" content="An AI-powered, multi-agent learning platform that finds your skill gaps, builds a personalised roadmap and adapts as you learn." />
   <meta name="theme-color" content="#05060f" />
   <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 32 32%22><rect width=%2232%22 height=%2232%22 rx=%228%22 fill=%22%2305060f%22/><path d=%22M8 22 16 6l8 16-8-5z%22 fill=%22%233cf0ff%22/></svg>" />
-  <link rel="preconnect" href="https://fonts.googleapis.com" />
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-  <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;600&family=Space+Grotesk:wght@400;500;600;700&display=swap" rel="stylesheet" media="print" onload="this.media='all'" />
   <link rel="stylesheet" href="css/app.css" />
+  <link rel="stylesheet" href="css/themes.css" />
 </head>
-<body class="is-loading">
+<body class="is-loading" data-page="home">
+  <a class="skip-link" href="#home">Skip to content</a>
   <!-- loader -->
   <div id="loader" aria-hidden="true">
     <div class="loader-core"><span class="loader-pct" id="loader-pct">0</span><span class="loader-unit">%</span></div>
@@ -39,13 +40,17 @@
       <a href="#watch" data-cursor="Play">Watch</a>
       <a href="#agents-sec" data-cursor="Meet">Agents</a>
       <a href="#features" data-cursor="Explore">Features</a>
+      <a href="about.html" data-cursor="Read">About</a>
       <a href="app.html" class="btn-launch magnetic" data-cursor="Launch">Launch app <span>→</span></a>
     </nav>
     <div class="top-tools">
-      <span class="mode-pill" id="mode-pill" title="Where the AI agents are running">…</span>
-      <button class="icon-btn" id="btn-sound" aria-label="Toggle sound" data-cursor="Sound">🔈</button>
+      <span class="mode-pill" id="mode-pill" data-tip="Where the AI agents are running">…</span>
+      <span id="user-slot"></span>
+      <button class="icon-btn" id="btn-mode" aria-label="Switch between bright and dark mode" data-tip="Switch to bright mode">☀️</button>
+      <button class="icon-btn" id="btn-settings" aria-label="Display and accessibility settings" data-tip="Colours, text size, contrast, minimalist style and more">⚙</button>
+      <button class="icon-btn" id="btn-sound" aria-label="Toggle sound" data-tip="Turn sound effects on or off">🔈</button>
       <div class="cursor-picker">
-        <button class="icon-btn" id="btn-cursor" aria-label="Choose cursor style" data-cursor="Cursor">✦</button>
+        <button class="icon-btn" id="btn-cursor" aria-label="Choose cursor style" data-tip="Choose a cursor style">✦</button>
         <div class="cursor-menu glass" id="cursor-menu" hidden>
           <div class="menu-title">Cursor style</div>
           <button data-mode="orb">◎ Orbit ring</button>
@@ -66,7 +71,8 @@
       <p class="hero-sub reveal">Eight AI agents read your skills, find the gaps for your dream role, build a step-by-step roadmap, test you like a game, and <b>re-plan the moment you struggle</b> or change your goal.</p>
       <div class="hero-cta reveal">
         <a class="btn primary magnetic" href="app.html" data-cursor="Go">Launch the app</a>
-        <a class="btn ghost magnetic" href="#watch" data-cursor="Play">▶ Watch how it works</a>
+        <a class="btn ghost magnetic" href="#watch" data-cursor="Play" data-tip="A 1-minute animated explainer">▶ Watch how it works</a>
+        <a class="btn ghost magnetic" href="signup.html" data-cursor="Join" data-tip="Create a student or faculty account">Create account</a>
       </div>
       <div class="hero-stats reveal">
         <div><b data-count="8">0</b><span>AI agents</span></div>
@@ -136,7 +142,7 @@
         <a class="btn primary magnetic" href="app.html" data-cursor="Go">Enter the forge</a>
         <a class="btn ghost magnetic" href="arena.html" data-cursor="Play">🎮 Play Skill Arena</a>
       </div>
-      <footer class="foot">Built with FastAPI · LangGraph · Google Gemini · Three.js — <a href="https://github.com/G-Jayakiruthika/skillforge-ai" target="_blank" rel="noopener" data-cursor="Code">source on GitHub</a></footer>
+      <footer class="foot"><a href="about.html">About</a> · <a href="contact.html">Contact</a> · <a href="agents.html">Meet the agents</a> · <a href="games.html">Games</a> · <a href="colleges.html">Colleges</a> · <a href="faculty.html">Faculty</a> · <a href="guide.html">Guide</a><br>Built with FastAPI · LangGraph · Google Gemini · Three.js — <a href="https://github.com/G-Jayakiruthika/skillforge-ai" target="_blank" rel="noopener" data-cursor="Code">source on GitHub</a></footer>
     </section>
   </main>
 

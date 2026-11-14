@@ -407,6 +407,25 @@ export function runGraph(learner, event) {
   return state;
 }
 
+/* ---------------- sanitising (mirrors backend/skillforge/security.py) ---------------- */
+export function cleanText(v, max = 300, newlines = false) {
+  let s = v == null ? "" : String(v);
+  s = s.normalize("NFKC").replace(/<[^>]*>/g, " ").replace(/(?:javascript|data|vbscript)\s*:/gi, "").replace(/[\x00-\x08\x0b\x0c\x0e-\x1f\x7f]/g, "");
+  s = newlines ? s.replace(/[ \t]+/g, " ").replace(/\n{3,}/g, "\n\n") : s.replace(/\s+/g, " ");
+  return s.trim().slice(0, max);
+}
+export const cleanEmail = (v) => { const e = cleanText(v, 254).toLowerCase().replace(/ /g, ""); return /^[a-z0-9._%+-]+@[a-z0-9-]+(\.[a-z0-9-]+)+$/.test(e) ? e : ""; };
+function sanitiseProfile(p) {
+  const out = { ...p };
+  for (const f of ["name", "organization", "institution", "interests", "education", "city", "district", "state", "dream_company", "target_role", "institution_id"]) if (f in out) out[f] = cleanText(out[f], 120);
+  if ("email" in out) out.email = cleanEmail(out.email);
+  if ("hours_per_week" in out) out.hours_per_week = Math.max(1, Math.min(60, parseInt(out.hours_per_week, 10) || 8));
+  for (const [key, fields, cap] of [["skills", ["name", "level"], 60], ["certifications", ["name", "issuer"], 120], ["projects", ["name", "description"], 240]])
+    if (Array.isArray(out[key])) out[key] = out[key].slice(0, 40).filter((i) => i && typeof i === "object").map((i) => Object.fromEntries(fields.filter((f) => f in i).map((f) => [f, cleanText(i[f], cap)])));
+  return out;
+}
+export const findInstitution = (key) => { const k = String(key || "").trim().toLowerCase(); return (K.INSTITUTIONS || []).find((i) => i.id === k || i.name.toLowerCase() === k) || null; };
+
 /* ---------------- service + storage ---------------- */
 class HttpError extends Error { constructor(status, msg) { super(msg); this.status = status; } }
 
@@ -417,6 +436,7 @@ export function createEngine(storage) {
     save: (db) => { try { localStorage.setItem("sf-db", JSON.stringify(db)); } catch (_) {} },
   };
   let db = storage.load() || { learners: {}, order: [] };
+  if ((db.v || 1) < 2) db = { learners: {}, order: [], v: 2 };   // v2: demo flags + account ownership
   const persist = () => storage.save(db);
   const put = (L) => { db.learners[L.id] = L; db.order = [L.id, ...db.order.filter((x) => x !== L.id)]; persist(); };
   const all = () => db.order.map((id) => db.learners[id]).filter(Boolean);
@@ -429,14 +449,21 @@ export function createEngine(storage) {
     meta: () => ({ roles: Object.entries(ROLE_BENCHMARKS).map(([name, skills]) => ({ name, description: ROLE_DESCRIPTIONS[name] || "", skills, industry: ROLE_INDUSTRY[name] || null })),
       industries: INDUSTRIES, companies: COMPANIES, company_note: COMPANY_NOTE,
       skills: Object.keys(SKILLS).map((s) => ({ name: s, esco: ESCO_CODES[s], prerequisites: PREREQUISITES[s] || [], hours: SKILLS[s].hours })),
-      levels: Object.keys(LEVEL_SCORES), pass_mark: MASTERY_PASS, graph: { engine: "in-browser", routes: ROUTES } }),
+      levels: Object.keys(LEVEL_SCORES), pass_mark: MASTERY_PASS, graph: { engine: "in-browser", routes: ROUTES },
+      institutions: K.INSTITUTIONS, geography: K.GEOGRAPHY, institution_note: K.INSTITUTION_NOTE, kind_labels: K.KIND_LABELS }),
     listLearners: () => all().map((l) => ({ id: l.id, name: l.name, target_role: l.target_role, readiness: l.match?.readiness, organization: l.organization })),
     getLearner: (id) => ({ learner: load(id), trace: [] }),
-    saveProfile(p) {
+    saveProfile(p, opts = {}) {
       if (!String(p.name || "").trim()) throw new HttpError(400, "name is required");
       const id = p.id || slug(p.name).slice(0, 20) + "-" + Math.random().toString(16).slice(2, 6);
       const L = db.learners[id] ? clone(db.learners[id]) : { id, created: nowIso() }, oldRole = L.target_role;
-      for (const f of ["name", "email", "organization", "target_role", "hours_per_week", "skills", "certifications", "projects", "interests", "dream_company", "education"]) if (f in p) L[f] = p[f];
+      p = sanitiseProfile(p);
+      for (const f of ["name", "email", "organization", "target_role", "hours_per_week", "skills", "certifications", "projects", "interests", "dream_company", "education", "institution_id", "institution", "city", "district", "state"]) if (f in p) L[f] = p[f];
+      if ("listed" in p) L.listed = !!p.listed;
+      if (opts.demo) L.demo = true;
+      if (opts.owner) L.owner = opts.owner;
+      const inst = findInstitution(p.institution_id || p.institution || "");
+      if (inst) Object.assign(L, { institution_id: inst.id, institution: inst.name, city: inst.city, district: inst.district, state: inst.state, organization: inst.name });
       L.target_role = L.target_role || "Full Stack Developer";
       if (oldRole && oldRole !== L.target_role) L.previous_role = oldRole;
       if (oldRole !== L.target_role) L.role_history = [...(L.role_history || []), { ts: nowIso(), role: L.target_role }];
@@ -471,8 +498,9 @@ export function createEngine(storage) {
       L.chat = [...(L.chat || []), { ts: nowIso(), q: question, a: answer, source: "rule-based mentor" }].slice(-40);
       put(L); return { answer, source: "rule-based mentor" };
     },
-    cohort(org = null) {
-      const ls = all().filter((l) => !org || (l.organization || "") === org), stats = {}, roles = {}, atRisk = [], rows = [];
+    cohort(org = null, pred = null) {
+      const visible = all().filter((l) => !pred || pred(l));
+      const ls = visible.filter((l) => !org || (l.organization || "") === org), stats = {}, roles = {}, atRisk = [], rows = [];
       for (const l of ls) {
         const m = l.match || {}; roles[l.target_role] = (roles[l.target_role] || 0) + 1;
         for (const s of m.skills || []) { const st = (stats[s.skill] = stats[s.skill] || { needed_by: 0, met: 0, gap_sum: 0 }); st.needed_by++; st.met += s.status === "met" ? 1 : 0; st.gap_sum += s.gap; }
@@ -492,33 +520,42 @@ export function createEngine(storage) {
       return { learners: ls.length, avg_readiness: rows.length ? pyRound(rows.reduce((a, r) => a + r.readiness, 0) / rows.length) : 0, roles, skill_gaps: gaps, at_risk: atRisk,
         table: rows.sort((a, b) => a.readiness - b.readiness),
         recommendations: gaps.slice(0, 3).filter((g) => g.pct_lacking >= 50).map((g) => `Run a cohort workshop on ${g.skill} - ${g.pct_lacking}% of learners who need it are below level.`),
-        organizations: [...new Set(all().map((l) => l.organization).filter(Boolean))].sort() };
+        organizations: [...new Set(visible.map((l) => l.organization).filter(Boolean))].sort() };
+    },
+    gameResult(id, data) {
+      const L = load(id), GAMES = ["arena", "blitz", "dash", "bridge", "memory", "duel"];
+      if (!GAMES.includes(data.game)) throw new HttpError(400, "Unknown game.");
+      const points = Math.max(0, Math.min(300, Math.trunc(Number(data.points) || 0)));
+      const g = (L.game = L.game || { points: 0, plays: 0, best: {} });
+      g.points = (g.points || 0) + points; g.plays = (g.plays || 0) + 1; g.best[data.game] = Math.max(g.best[data.game] || 0, points);
+      put(L); return { ok: true, game: g };
     },
     seedDemo(reset = false) {
-      if (reset) { db = { learners: {}, order: [] }; persist(); }
-      if (all().length) return { seeded: false, learners: all().length };
+      // Only the fictional demo learners are ever removed - profiles created by signed-up users stay.
+      if (reset) { for (const l of all()) if (l.demo) { delete db.learners[l.id]; db.order = db.order.filter((x) => x !== l.id); } persist(); }
+      if (all().some((l) => l.demo)) return { seeded: false, learners: all().length };
       const ORG = "Demo University - MCA 2026";
       const qa = (skill, n) => SKILLS[skill].quiz.map((q, i) => (i < n ? q.answer : (q.answer + 1) % q.options.length));
       const people = [
         { id: "jane-doe", name: "Jane Doe", target_role: "Full Stack Developer", hours_per_week: 8, skills: [{ name: "Python", level: "intermediate" }, { name: "SQL", level: "intermediate" }, { name: "basic HTML", level: "beginner" }],
-          certifications: [{ name: "HackerRank SQL (Basic)" }], projects: [{ name: "Student marks analyser", description: "Python script that loads marks from a MySQL database and prints reports" }], interests: "web apps, startups", dream_company: "Zoho", education: "MCA" },
+          certifications: [{ name: "HackerRank SQL (Basic)" }], projects: [{ name: "Student marks analyser", description: "Python script that loads marks from a MySQL database and prints reports" }], interests: "web apps, startups", dream_company: "Zoho", education: "MCA", institution_id: "rathinam-technical-campus" },
         { id: "arjun-k", name: "Arjun K", target_role: "Data Engineer", hours_per_week: 10, skills: [{ name: "py", level: "intermediate" }, { name: "postgres", level: "advanced" }, { name: "excel", level: "intermediate" }],
-          certifications: [], projects: [{ name: "Sales ETL", description: "Python + SQL ETL into a star schema" }], dream_company: "Amazon", education: "B.Tech IT" },
+          certifications: [], projects: [{ name: "Sales ETL", description: "Python + SQL ETL into a star schema" }], dream_company: "Amazon", education: "B.Tech IT", institution_id: "psg-college-of-technology" },
         { id: "meera-s", name: "Meera S", target_role: "Frontend Developer", hours_per_week: 6, skills: [{ name: "HTML", level: "advanced" }, { name: "CSS", level: "advanced" }, { name: "vanilla js", level: "beginner" }, { name: "github", level: "intermediate" }],
-          certifications: [{ name: "freeCodeCamp Responsive Web Design" }], projects: [] },
-        { id: "rahul-p", name: "Rahul P", target_role: "Data Analyst", hours_per_week: 5, skills: [{ name: "excel", level: "advanced" }, { name: "sql", level: "beginner" }], certifications: [], projects: [] },
+          certifications: [{ name: "freeCodeCamp Responsive Web Design" }], projects: [], education: "B.Sc CS", institution_id: "loyola-college" },
+        { id: "rahul-p", name: "Rahul P", target_role: "Data Analyst", hours_per_week: 5, skills: [{ name: "excel", level: "advanced" }, { name: "sql", level: "beginner" }], certifications: [], projects: [], education: "BBA", institution_id: "bishop-heber-college" },
         { id: "fatima-n", name: "Fatima N", target_role: "Backend Developer (Python)", hours_per_week: 12, skills: [{ name: "python3", level: "advanced" }, { name: "flask", level: "intermediate" }, { name: "mysql", level: "intermediate" }, { name: "git", level: "intermediate" }],
-          certifications: [{ name: "AWS Cloud Practitioner" }], projects: [{ name: "Library REST API", description: "Flask REST API with MySQL and Docker" }], dream_company: "Google", education: "BCA" },
+          certifications: [{ name: "AWS Cloud Practitioner" }], projects: [{ name: "Library REST API", description: "Flask REST API with MySQL and Docker" }], dream_company: "Google", education: "BCA", institution_id: "jamal-mohamed-college" },
         { id: "karthik-r", name: "Karthik R", target_role: "Mechanical Design Engineer", hours_per_week: 7, skills: [{ name: "autocad", level: "intermediate" }, { name: "cnc", level: "beginner" }],
-          certifications: [{ name: "SolidWorks CSWA" }], projects: [{ name: "Go-kart chassis", description: "Designed the frame in SolidWorks and checked machining" }], dream_company: "Tata Motors", education: "B.E. Mechanical" },
+          certifications: [{ name: "SolidWorks CSWA" }], projects: [{ name: "Go-kart chassis", description: "Designed the frame in SolidWorks and checked machining" }], dream_company: "Tata Motors", education: "B.E. Mechanical", institution_id: "kumaraguru-college-of-technology" },
         { id: "priya-m", name: "Priya M", target_role: "Financial Analyst", hours_per_week: 6, skills: [{ name: "tally", level: "intermediate" }, { name: "excel", level: "intermediate" }, { name: "gst", level: "beginner" }],
-          certifications: [], projects: [], dream_company: "Deloitte", education: "B.Com" },
+          certifications: [], projects: [], dream_company: "Deloitte", education: "B.Com", institution_id: "psg-college-of-arts-and-science" },
         { id: "sanjay-v", name: "Sanjay V", target_role: "Embedded Systems Engineer", hours_per_week: 9, skills: [{ name: "c", level: "intermediate" }, { name: "arduino", level: "intermediate" }, { name: "digital electronics", level: "beginner" }],
-          certifications: [], projects: [{ name: "Smart irrigation", description: "Arduino soil sensor with IoT alerts over MQTT" }], dream_company: "Bosch", education: "B.E. ECE" },
+          certifications: [], projects: [{ name: "Smart irrigation", description: "Arduino soil sensor with IoT alerts over MQTT" }], dream_company: "Bosch", education: "B.E. ECE", institution_id: "kongu-engineering-college" },
         { id: "divya-s", name: "Divya S", target_role: "Clinical Research Associate", hours_per_week: 5, skills: [{ name: "medical terminology", level: "intermediate" }, { name: "communication", level: "intermediate" }],
-          certifications: [{ name: "GCP training certificate (clinical research)" }], projects: [], dream_company: "IQVIA", education: "B.Pharm" },
+          certifications: [{ name: "GCP training certificate (clinical research)" }], projects: [], dream_company: "IQVIA", education: "B.Pharm", institution_id: "rathinam-technical-campus" },
       ];
-      for (const p of people) svc.saveProfile({ ...p, organization: ORG });
+      for (const p of people) svc.saveProfile({ ...p, organization: ORG }, { demo: true });
       svc.assess("arjun-k", "SQL", "quiz", qa("SQL", 3));
       svc.logProgress("arjun-k", "Data Modeling", 4, "Kimball chapter 1-2");
       svc.assess("meera-s", "JavaScript", "quiz", qa("JavaScript", 1));
@@ -563,5 +600,6 @@ export function createEngine(storage) {
   }
 
   svc.seedDemo();
-  return { dispatch, svc };
+  const remove = (id) => { delete db.learners[id]; db.order = db.order.filter((x) => x !== id); persist(); };
+  return { dispatch, svc, all, load, put, remove, routes, HttpError, db: () => db, persist };
 }

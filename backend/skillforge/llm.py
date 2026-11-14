@@ -9,26 +9,18 @@ deterministic logic - so the app always works, with or without a key.
 from __future__ import annotations
 
 import json
-import os
-from pathlib import Path
+import threading
 from typing import Any, Dict, Optional
 
-# Load backend/.env (KEY=value lines) without needing python-dotenv.
-_env = Path(__file__).resolve().parent.parent / ".env"
-if _env.is_file():
-    for _line in _env.read_text(encoding="utf-8").splitlines():
-        if "=" in _line and not _line.lstrip().startswith("#"):
-            _k, _v = _line.split("=", 1)
-            if _v.strip() and _v.strip() != "your-key-here":
-                os.environ.setdefault(_k.strip(), _v.strip().strip('"'))
+from .security import Env  # loads .env; the key itself is never stored in code
 
-MODEL = os.getenv("GEMINI_MODEL", "gemini-3.8-flash")
+MODEL = Env.gemini_model
 
 _client = None
 _status = "disabled (no GEMINI_API_KEY)"
 
 try:  # pragma: no cover - depends on environment
-    if os.getenv("GEMINI_API_KEY") or os.getenv("GOOGLE_API_KEY"):
+    if Env.gemini_key:
         from google import genai  # type: ignore
 
         _client = genai.Client()
@@ -38,7 +30,26 @@ except Exception as exc:  # pragma: no cover
     _status = f"disabled ({type(exc).__name__}: {exc})"[:120]
 
 
+# Consent gate: Gemini is an outside processor, so it is used only when the signed-in user
+# has switched "AI processing" on. Set per request by service.py; cleared afterwards.
+_allowed = threading.local()
+
+
+def set_allowed(flag: bool) -> None:
+    _allowed.ok = bool(flag)
+
+
+def allowed() -> bool:
+    return getattr(_allowed, "ok", False)
+
+
 def available() -> bool:
+    """True only when a key is configured AND this request may use an outside AI processor."""
+    return _client is not None and allowed()
+
+
+def configured() -> bool:
+    """A key is present (ignores consent) - for the status pill."""
     return _client is not None
 
 

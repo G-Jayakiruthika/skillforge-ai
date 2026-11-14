@@ -87,7 +87,7 @@ def test_progress_and_cohort_and_routes():
     assert routes.dispatch("GET", "/api/health", {}, {})[0] == 200
     assert routes.dispatch("GET", "/api/learners/nope", {}, {})[0] == 404
     assert routes.dispatch("POST", "/api/learners/jane-doe/pivot", {}, {"target_role": "Astronaut"})[0] == 400
-    code, quiz = routes.dispatch("GET", "/api/quiz", {"skill": "HTML/CSS"}, {})
+    code, quiz, _ = routes.dispatch("GET", "/api/quiz", {"skill": "HTML/CSS"}, {})
     assert code == 200 and "answer" not in quiz["questions"][0]   # answers never sent to browser
 
 

@@ -134,7 +134,7 @@ async function runBlitz(main, ctx, skills) {
   function end() {
     clearInterval(tick); document.removeEventListener("keydown", key);
     const store = ctx.store(), best = Math.max(store.best || 0, score), isBest = score > (store.best || 0);
-    store.best = best; store.xp = (store.xp || 0) + Math.round(score / 25); ctx.saveStore(store);
+    store.best = best; store.xp = (store.xp || 0) + Math.round(score / 25); ctx.saveStore(store, "blitz");
     if (isBest && score > 0) { ctx.confetti(); sound.play("level"); }
     main.innerHTML = `<div class="end-screen"><h2 style="font-size:44px">${score} pts</h2><p>${isBest ? "🏆 New personal best!" : `Best: ${best}`} · +${Math.round(score / 25)} XP</p><button class="btn primary" id="again">Play again</button></div>`;
     main.querySelector("#again").onclick = () => runBlitz(main, ctx, skills);

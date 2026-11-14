@@ -15,6 +15,12 @@ import { scramble, observeReveals, countUp, typewrite, interactions, confetti, s
 import { createExplainer } from "./explainer.js";
 import { renderArena } from "./arena.js";
 import { renderWorld } from "./world.js";
+import * as PV from "./privacy.js";
+import * as theme from "./theme.js";
+import { initVoice } from "./voice.js";
+import { DOLLS, dollHtml, mountAll, guideForSkill } from "./avatars.js";
+import * as P2 from "./pages2.js";
+import { stopGame } from "./games.js";
 
 const $ = (s, el = document) => el.querySelector(s);
 const $$ = (s, el = document) => [...el.querySelectorAll(s)];
@@ -24,22 +30,36 @@ const pretty = (s) => String(s || "").replace(/_/g, " ");
 const PALETTE = ["#3cf0ff", "#ff3ea5", "#ffb547", "#9dff6a", "#8b5cff", "#4dd5a6", "#ff7a59", "#5b8cff"];
 const colorFor = (s) => PALETTE[[...String(s)].reduce((a, c) => a + c.charCodeAt(0), 0) % PALETTE.length];
 const PAGE = document.body.dataset.page || "home";
-const S = { mode: "server", engine: null, meta: null, learner: null, learners: [], selected: null, quiz: null, quizSkill: null, scene: null, lastXP: null };
+const S = { mode: "server", engine: null, accounts: null, user: null, meta: null, learner: null, learners: [], selected: null, quiz: null, quizSkill: null, scene: null, lastXP: null };
 
 /* ===================== Pages ===================== */
+// [id, file, icon, label, feature number, group, hover note]
 const PAGES = [
-  ["app", "app.html", "◈", "Dashboard", ""],
-  ["profile", "profile.html", "◍", "User Profile", "1"],
-  ["analysis", "analysis.html", "◎", "Skill Analysis", "2"],
-  ["career", "career.html", "🎯", "Career Matching", "3"],
-  ["learn", "learn.html", "⟟", "Learning Path", "4"],
-  ["world", "world.html", "🗺", "Skill World", ""],
-  ["arena", "arena.html", "✪", "Skill Arena", ""],
-  ["progress", "progress.html", "↗", "Progress", "5"],
-  ["mentor", "mentor.html", "✧", "AI Mentor", "6"],
-  ["org", "org.html", "▦", "Organization", ""],
-  ["guide", "guide.html", "?", "Guide", ""],
+  ["app", "app.html", "◈", "Dashboard", "", "Learn", "Your overview: readiness, mentor message and the six features"],
+  ["profile", "profile.html", "◍", "User Profile", "1", "Learn", "Your details, skills, certificates, projects and goals"],
+  ["analysis", "analysis.html", "◎", "Skill Analysis", "2", "Learn", "Strengths and weaknesses, for every industry"],
+  ["career", "career.html", "🎯", "Career Matching", "3", "Learn", "Compare yourself with job roles and companies"],
+  ["learn", "learn.html", "⟟", "Learning Path", "4", "Learn", "Courses, tutorials and exercises in the right order"],
+  ["progress", "progress.html", "↗", "Progress", "5", "Learn", "Study hours, test scores and achievements"],
+  ["mentor", "mentor.html", "✧", "AI Mentor", "6", "Learn", "Ask questions and get guidance"],
+  ["world", "world.html", "🗺", "Skill World", "", "Play", "See where you are as a game map"],
+  ["arena", "arena.html", "✪", "Skill Arena", "", "Play", "Quiz missions with lives and combos"],
+  ["games", "games.html", "🎮", "Games", "", "Play", "Doll Dash, Bridge Builder and Memory Match"],
+  ["compete", "compete.html", "🏆", "Compete", "", "Play", "Leaderboard and head-to-head duels"],
+  ["agents", "agents.html", "🤖", "Meet the agents", "", "Play", "The 3D agent and skill-guide dolls"],
+  ["colleges", "colleges.html", "🏫", "By college", "", "Community", "Student lists for each college and university"],
+  ["places", "places.html", "📍", "By city & state", "", "Community", "Student lists by state, district and city"],
+  ["browse", "browse.html", "🔎", "Find students", "", "Community", "Dropdowns to pick a university or college and see its students"],
+  ["faculty", "faculty.html", "👩‍🏫", "Faculty", "", "Community", "Contact a faculty member and learn from them"],
+  ["portal", "portal.html", "🎓", "Faculty portal", "", "Community", "For faculty: view your students' profiles"],
+  ["org", "org.html", "▦", "Organization", "", "Community", "Cohort skill gaps for trainers"],
+  ["about", "about.html", "ℹ", "About", "", "More", "What SkillForge AI is and how it protects your data"],
+  ["contact", "contact.html", "✉", "Contact", "", "More", "Send us a message"],
+  ["consent", "consent.html", "🛡", "Data Consent", "", "More", "Choose what we may use your data for"],
+  ["privacy", "privacy.html", "🔐", "Data Privacy", "", "More", "What we keep, download it, or delete it"],
+  ["guide", "guide.html", "?", "Guide", "", "More", "How to use everything"],
 ];
+const HIDDEN_PAGES = { signup: "Sign up", login: "Sign in", account: "Account" };
 const FEATURES6 = [
   ["profile", "1", "User Profile", "Learner details, existing skills, certifications, projects, dream company and career goal.", "#3cf0ff"],
   ["analysis", "2", "Skill Analysis", "Strengths and weaknesses from your skills and assessments — scored for every industry.", "#8b5cff"],
@@ -54,32 +74,36 @@ function topbarHtml() {
   return `<header class="topbar" id="topbar">
     <a class="logo" href="index.html" data-cursor="Home"><svg viewBox="0 0 32 32" width="30" height="30" aria-hidden="true"><defs><linearGradient id="lg" x1="0" x2="1"><stop offset="0" stop-color="#3cf0ff"/><stop offset="1" stop-color="#ff3ea5"/></linearGradient></defs><path d="M6 24 16 4l10 20-10-6z" fill="url(#lg)"/></svg>
       <span class="logo-text glitch" data-text="SkillForge">SkillForge</span><span class="logo-ai">AI</span></a>
-    <nav class="top-links"><a href="index.html#watch" data-cursor="Play">Watch</a><a href="world.html" data-cursor="Map">Skill World</a><a href="arena.html" data-cursor="Play">Arena</a></nav>
+    <nav class="top-links" aria-label="Quick links"><a href="index.html#watch" data-tip="Watch the 1-minute explainer">Watch</a><a href="games.html" data-tip="Play learning games">Games</a><a href="about.html">About</a></nav>
     <div class="top-tools">
       <span class="mode-pill" id="mode-pill">…</span>
-      <div class="xp-chip" id="xp-chip" title="Your XP and level"><span class="lvl" id="xp-lvl">L1</span><span class="xp-bar"><i id="xp-fill"></i></span><span id="xp-num">0 XP</span></div>
-      <button class="icon-btn" id="btn-sound" aria-label="Toggle sound" data-cursor="Sound">🔈</button>
-      <div class="cursor-picker"><button class="icon-btn" id="btn-cursor" aria-label="Choose cursor style" data-cursor="Cursor">✦</button>
+      <span id="user-slot"></span>
+      <div class="xp-chip" id="xp-chip" data-tip="Your XP and level — earned by passing tests, studying and playing"><span class="lvl" id="xp-lvl">L1</span><span class="xp-bar"><i id="xp-fill"></i></span><span id="xp-num">0 XP</span></div>
+      <button class="icon-btn" id="btn-mode" aria-label="Switch between bright and dark mode" data-tip="Switch to bright mode">☀️</button>
+      <button class="icon-btn" id="btn-settings" aria-label="Display and accessibility settings" data-tip="Colours, text size, contrast, minimalist style and more">⚙</button>
+      <button class="icon-btn" id="btn-sound" aria-label="Toggle sound" data-tip="Turn sound effects on or off">🔈</button>
+      <div class="cursor-picker"><button class="icon-btn" id="btn-cursor" aria-label="Choose cursor style" data-tip="Choose a cursor style">✦</button>
         <div class="cursor-menu glass" id="cursor-menu" hidden><div class="menu-title">Cursor style</div>
           <button data-mode="orb">◎ Orbit ring</button><button data-mode="comet">☄ Comet trail</button><button data-mode="neon">〰 Neon ribbon</button><button data-mode="spark">✺ Spark burst</button><button data-mode="system">↖ System default</button></div></div>
     </div></header>`;
 }
 function injectChrome() {
   const layers = `
-  <div id="loader" aria-hidden="true"><div class="loader-core"><span class="loader-pct" id="loader-pct">0</span><span class="loader-unit">%</span></div><div class="loader-label">OPENING ${esc((PAGES.find((p) => p[0] === PAGE) || [, , , "SKILLFORGE"])[3].toUpperCase())}</div><div class="loader-bar"><span id="loader-bar"></span></div></div>
+  <div id="loader" aria-hidden="true"><div class="loader-core"><span class="loader-pct" id="loader-pct">0</span><span class="loader-unit">%</span></div><div class="loader-label">OPENING ${esc(((PAGES.find((p) => p[0] === PAGE) || [])[3] || HIDDEN_PAGES[PAGE] || "SKILLFORGE").toUpperCase())}</div><div class="loader-bar"><span id="loader-bar"></span></div></div>
   <canvas id="gl" aria-hidden="true"></canvas><div class="grain" aria-hidden="true"></div>
   <canvas id="cursor-canvas" aria-hidden="true"></canvas><div id="cursor-dot" aria-hidden="true"></div><div id="cursor-ring" aria-hidden="true"><span id="cursor-label"></span></div>
   <canvas id="confetti" aria-hidden="true"></canvas>
+  <a class="skip-link" href="#main">Skip to content</a>
   ${topbarHtml()}
   <div id="app">
     <aside class="side" id="side">
-      <div class="who"><div class="avatar" id="avatar">?</div><div class="who-text"><select id="learner-select" aria-label="Choose learner"></select><span id="who-role" class="muted small"></span></div></div>
-      <nav class="side-nav" id="side-nav">${PAGES.map(([id, href, ico, label, num]) => `<a href="${href}" class="${id === PAGE ? "active" : ""}" data-cursor="Open"><i>${ico}</i><span>${label}</span>${num ? `<em class="num">${num}</em>` : ""}<button class="newtab" data-href="${href}" title="Open in a new page" aria-label="Open ${label} in a new page">↗</button></a>`).join("")}</nav>
-      <a class="btn ghost small-btn" href="profile.html?new=1" data-cursor="New">+ New learner</a>
+      <div class="who"><div class="avatar" id="avatar" aria-hidden="true">?</div><div class="who-text"><select id="learner-select" aria-label="Choose learner" data-tip="Switch between learner profiles"></select><span id="who-role" class="muted small"></span></div></div>
+      <nav class="side-nav" id="side-nav" aria-label="Pages">${PAGES.map(([id, href, ico, label, num, group, tip], i) => `${i === 0 || PAGES[i - 1][5] !== group ? `<div class="nav-group">${group}</div>` : ""}<a href="${href}" class="${id === PAGE ? "active" : ""}" ${id === PAGE ? 'aria-current="page"' : ""} data-tip="${tip}"><i aria-hidden="true">${ico}</i><span>${label}</span>${num ? `<em class="num" aria-label="feature ${num}">${num}</em>` : ""}<button class="newtab" data-href="${href}" data-tip="Open ${label} in a new tab" aria-label="Open ${label} in a new tab">↗</button></a>`).join("")}</nav>
+      <a class="btn ghost small-btn" id="new-learner" href="signup.html" data-tip="Create a free account to get your own profile, roadmap and progress">+ Create my profile</a>
     </aside>
-    <section class="stage"><div id="page" class="page-in"></div></section>
+    <main class="stage" id="main" tabindex="-1"><div id="page" class="page-in"></div></main>
   </div>
-  <aside class="bus collapsed" id="bus"><button class="bus-head" id="bus-toggle" data-cursor="Toggle"><span class="pulse-dot"></span><b>Agent bus</b><span class="muted small" id="bus-count">8 agents ready</span><span class="chev">▾</span></button><ol id="bus-list"></ol></aside>`;
+  <aside class="bus collapsed" id="bus" aria-label="Agent messages"><button class="bus-head" id="bus-toggle" data-tip="Live messages between the 8 AI agents — click to open or close"><span class="pulse-dot"></span><b>Agent bus</b><span class="muted small" id="bus-count">8 agents ready</span><span class="chev">▾</span></button><ol id="bus-list"></ol></aside>`;
   document.body.insertAdjacentHTML("afterbegin", layers);
 }
 function injectCommon() {
@@ -87,19 +111,20 @@ function injectCommon() {
   <div class="modal" id="modal" hidden><div class="modal-card glass" role="dialog" aria-modal="true" aria-labelledby="modal-title">
     <div class="modal-head"><h3 id="modal-title">Assessment</h3><button class="icon-btn" id="modal-close" aria-label="Close" data-cursor="Close">✕</button></div>
     <div class="seg" id="modal-seg"><button data-mode="quiz" class="active">Quiz</button><button data-mode="explain">Explain it (voice / text)</button></div><div id="modal-body"></div></div></div>
-  <div class="toast" id="toast" hidden></div><div id="portal" aria-hidden="true"><span class="portal-text" id="portal-text"></span></div>`);
+  <div class="modal" id="gmodal" hidden><div class="modal-card glass" role="dialog" aria-modal="true" aria-labelledby="gmodal-title"><div class="modal-head"><h3 id="gmodal-title"></h3><button class="icon-btn" id="gmodal-close" aria-label="Close">✕</button></div><div id="gmodal-body"></div></div></div>
+  <div class="toast" id="toast" role="status" aria-live="polite" hidden></div><div id="portal" aria-hidden="true"><span class="portal-text" id="portal-text"></span></div>`);
 }
 
 /* ===================== Portal page transitions ===================== */
 function portalIn() {
   let from = null; try { from = JSON.parse(sessionStorage.getItem("sf-portal") || "null"); sessionStorage.removeItem("sf-portal"); } catch (_) {}
-  const p = $("#portal"); if (!from || reduced) return;
+  const p = $("#portal"); if (!from || reduced || theme.isMinimal() || theme.motionOff()) return;
   p.style.setProperty("--px", from.x + "px"); p.style.setProperty("--py", from.y + "px");
   $("#portal-text").textContent = from.label || "";
   p.classList.add("cover"); requestAnimationFrame(() => requestAnimationFrame(() => { p.classList.remove("cover"); p.classList.add("reveal"); setTimeout(() => p.classList.remove("reveal"), 900); }));
 }
 function portalTo(href, x, y, label) {
-  if (reduced) { location.href = href; return; }
+  if (reduced || theme.isMinimal() || theme.motionOff()) { location.href = href; return; }
   const p = $("#portal");
   p.style.setProperty("--px", x + "px"); p.style.setProperty("--py", y + "px"); $("#portal-text").textContent = label || "";
   p.classList.add("go"); sound.play("whoosh"); S.scene?.warp();
@@ -123,14 +148,14 @@ async function api(path, body) {
   if (S.engine) {
     const [p, qs] = path.split("?"), query = Object.fromEntries(new URLSearchParams(qs || ""));
     busBusy(true); await new Promise((r) => setTimeout(r, method === "POST" ? 240 : 0));
-    const [status, res] = S.engine.dispatch(method, "/" + p.replace(/^\//, ""), query, body || {});
+    const [status, res] = await S.accounts.handle(method, "/" + p.replace(/^\//, ""), query, body || {});
     busBusy(false);
     if (status !== 200) throw new Error(res.detail || "Error");
     return JSON.parse(JSON.stringify(res));
   }
   busBusy(true);
   try {
-    const res = await fetch(path.replace(/^\//, ""), body === undefined ? {} : { method, headers: { "Content-Type": "application/json" }, body: JSON.stringify(body) });
+    const res = await fetch(path.replace(/^\//, ""), body === undefined ? { credentials: "same-origin" } : { method, credentials: "same-origin", headers: { "Content-Type": "application/json" }, body: JSON.stringify(body) });
     const data = await res.json().catch(() => ({}));
     if (!res.ok) throw new Error(data.detail || res.statusText);
     return data;
@@ -146,8 +171,8 @@ async function detectMode() {
   } catch (_) { await startLocal(); }
 }
 async function startLocal() {
-  const { createEngine } = await import("./engine.js");
-  S.engine = createEngine(); S.mode = "web"; S.health = S.engine.svc.health();
+  const [{ createEngine }, { createAccounts }] = await Promise.all([import("./engine.js"), import("./engine-accounts.js")]);
+  S.engine = createEngine(); S.accounts = createAccounts(S.engine); S.mode = "web"; S.health = S.engine.svc.health();
   try { sessionStorage.setItem("sf-web", "1"); } catch (_) {}
 }
 function toast(msg) { const t = $("#toast"); t.textContent = msg; t.hidden = false; clearTimeout(toast._t); toast._t = setTimeout(() => (t.hidden = true), 2800); }
@@ -164,7 +189,10 @@ const AGENTS = [
   ["Mentor", "✨", "#5b8cff", "Explains what changed in plain words, lists your next actions, and answers your questions in chat."],
 ];
 function renderLanding() {
-  $("#agent-grid").innerHTML = AGENTS.map(([n, ico, col, d], i) => `<article class="glass tilt agent-card reveal" style="--ac:${col}" data-cursor="Agent"><span class="idx">0${i + 1}</span><div class="orb">${ico}</div><h3>${n}</h3><p>${d}</p></article>`).join("");
+  const ids = ["supervisor", "profiler", "analyst", "matcher", "architect", "curator", "assessor", "mentor"];
+  $("#agent-grid").innerHTML = AGENTS.map(([n, ico, col, d], i) => `<article class="glass tilt agent-card reveal" style="--ac:${col}" data-doll-hover="${ids[i]}" data-tip="${esc(DOLLS[ids[i]].name)} — the ${n} agent"><span class="idx">0${i + 1}</span>${dollHtml(ids[i], 96)}<h3>${n} <span class="small muted">· ${esc(DOLLS[ids[i]].name)}</span></h3><p>${d}</p></article>`).join("");
+  const landDolls = mountAll($("#agent-grid"));
+  $$("[data-doll-hover]").forEach((c) => (c.onpointerenter = () => landDolls[c.dataset.dollHover]?.play("wave", 1500)));
   $("#feature-grid").innerHTML = FEATURES6.map(([id, num, title, desc, col]) => `<a class="glass tilt feature-card portal-card reveal" href="${id}.html" style="--ac:${col}" data-cursor="Enter"><span class="num">FEATURE ${num}</span><h3>${title}</h3><p>${desc}</p><span class="enter">Enter →</span><button class="newtab" data-href="${id}.html" title="Open in a new page">↗</button></a>`).join("")
     + `<a class="glass tilt feature-card portal-card reveal" href="world.html" style="--ac:#4dd5a6" data-cursor="Explore"><span class="num">BONUS</span><h3>🗺 Skill World</h3><p>See where you are on your journey as a game map — islands, fog, volcanoes and your dream company's castle.</p><span class="enter">Explore →</span><button class="newtab" data-href="world.html">↗</button></a>
        <a class="glass tilt feature-card portal-card reveal" href="arena.html" style="--ac:#ff7a59" data-cursor="Play"><span class="num">BONUS</span><h3>🎮 Skill Arena</h3><p>Prove skills in timed missions with lives and combos — results count as real assessments.</p><span class="enter">Play →</span><button class="newtab" data-href="arena.html">↗</button></a>`;
@@ -175,12 +203,17 @@ function renderLanding() {
 /* ===================== Learner state ===================== */
 async function loadLearners() {
   S.learners = await api("api/learners");
-  const sel = $("#learner-select"); if (sel) sel.innerHTML = S.learners.map((l) => `<option value="${esc(l.id)}">${esc(l.name)}</option>`).join("");
+  const sel = $("#learner-select"); if (!sel) return;
+  // Your own profile first, then your students (faculty), then the fictional demo learners.
+  const opt = (l) => `<option value="${esc(l.id)}">${esc(l.name)}${l.mine ? " (you)" : ""}</option>`;
+  const mine = S.learners.filter((l) => l.mine), real = S.learners.filter((l) => !l.mine && !l.demo), demo = S.learners.filter((l) => l.demo);
+  sel.innerHTML = mine.map(opt).join("") + (real.length ? `<optgroup label="Students">${real.map(opt).join("")}</optgroup>` : "") + (demo.length ? `<optgroup label="Demo learners (sample data)">${demo.map(opt).join("")}</optgroup>` : "");
 }
 async function selectLearner(id, rerender = true) {
   try {
     const r = await api(`api/learners/${encodeURIComponent(id)}`);
-    S.learner = r.learner; S.selected = null; S.lastXP = null;
+    S.learner = r.learner; S.canEdit = r.can_edit !== false; S.selected = null; S.lastXP = null;
+    document.body.classList.toggle("read-only", !S.canEdit);
     try { localStorage.setItem("sf-learner", id); } catch (_) {}
     if ($("#learner-select")) $("#learner-select").value = id;
     updateWho(); updateXP(true); if (rerender) renderPage();
@@ -199,7 +232,13 @@ function applyResult(r) {
 
 /* ===================== XP + achievements ===================== */
 function arenaStore(id = S.learner?.id) { try { return JSON.parse(localStorage.getItem("sf-arena-" + id) || "{}"); } catch (_) { return {}; } }
-function saveArena(data) { try { localStorage.setItem("sf-arena-" + S.learner.id, JSON.stringify(data)); } catch (_) {} updateXP(); }
+function saveArena(data, game = "arena") {
+  // Stars/bests stay in this browser; the points are also sent to the server so they count on the leaderboard.
+  const before = arenaStore().xp || 0, gained = Math.max(0, (data.xp || 0) - before);
+  try { localStorage.setItem("sf-arena-" + S.learner.id, JSON.stringify(data)); } catch (_) {}
+  updateXP();
+  if (gained > 0 && S.canEdit) api(`api/learners/${S.learner.id}/game`, { game, points: Math.min(300, gained) }).catch(() => {});
+}
 function xpOf(L) {
   const a = arenaStore(L.id);
   const fromAssess = (L.assessments || []).reduce((s, x) => s + Math.round(x.score / 5) + (x.passed ? 25 : 0), 0);
@@ -258,6 +297,19 @@ const NOTES = {
   progress: ["Feature 5 · See how far you've come", ["Readiness over time shows the effect of every action.", "Assessment scores: green passed, red sent you to a remedial lab (dashed line = 60% pass mark).", "Achievements unlock as you learn; XP and level are in the top bar.", "Study hours per skill come from what you log on the Learning Path page."], ""],
   mentor: ["Feature 6 · Ask the AI Mentor", ["Type any question or tap a suggestion.", "Answers use your real plan: active milestone, gaps, hours, ETA.", "The mentor message and next actions change after every success or struggle.", "With a Gemini key on the server version, answers are written by Gemini."], "Tip: try “Am I ready for interviews?”"],
   org: ["For universities & companies", ["Every learner in the organisation at a glance — across all industries.", "The heat map shows which skills most learners lack.", "“Needs attention” lists learners with low readiness, repeated failures or a remedial lab.", "Click a name to open that learner's dashboard."], "Tip: “Reset demo data” restores the 9 sample learners."],
+  games: ["Learn by playing", ["Doll Dash: a 3D run — steer your guide into the lane with the right answer (← → or tap).", "Bridge Builder: lay skills in prerequisite order so the doll can cross.", "Memory Match: pair each concept with its meaning.", "Doll Dash is saved as a real assessment; the other two give XP."], "Tip: choose the skill for Doll Dash in the dropdown under the game cards."],
+  compete: ["Friendly competition", ["The leaderboard ranks learners by proven progress, not clicks.", "Switch between everyone and only your college.", "Pick an opponent and start a 5-question duel.", "Winning duels earns XP for your level."], "Duel opponents are simulated from their real scores — live matches need a real-time server."],
+  agents: ["Who is who", ["The 8 agents run the platform; each has its own 3D doll.", "The 9 skill guides each teach one industry's skills.", "Point at or click a doll to see it wave and hear what it does.", "You will meet your guides again on the Learning Path and in the games."], ""],
+  colleges: ["Students by institution", ["Search or filter the list of Tamil Nadu universities and colleges.", "Click an institution to see its students and faculty.", "Cards show public information only: goal, readiness and top skills.", "Full profiles open only for the student, their college's faculty, or an admin."], "More institutions and other states can be added later."],
+  places: ["Students by place", ["Open the state, then a district, then a city.", "Click a count to list every student in that district.", "Click a city to list students there.", "Sign in as faculty to open full profiles from your own college."], ""],
+  browse: ["Dropdown finder", ["Choose a state, then narrow by district and city.", "Pick a university or college from the last dropdown.", "Optionally filter by career goal or name.", "Results update instantly."], ""],
+  faculty: ["Learn from faculty", ["Choose an institution to list its faculty members.", "Press “Ask a question” to send a message.", "Your message is saved and passed to that faculty member.", "Faculty emails are never shown publicly."], "Are you a faculty member? Sign up to appear here."],
+  portal: ["For faculty members", ["See every student from your own college in one table.", "“Need help” lists students with low readiness, repeated failures or a remedial lab.", "“Skills to teach next” shows what most students are missing.", "Press View to open a student's full profile."], "Demo faculty logins are on the Sign in page."],
+  signup: ["Create an account", ["Choose Student or Faculty member.", "Pick your college from the list (grouped by district).", "Use a password of 8+ characters with a letter and a number.", "Students get a personal profile; faculty get the faculty portal."], ""],
+  login: ["Sign in", ["Enter the email and password you signed up with.", "Or tap a demo account to try the faculty portal or admin view.", "Too many wrong attempts pause sign-in for 15 minutes.", "Use ⚙ → Account to change your password later."], ""],
+  contact: ["Send a message", ["Fill in your name and email.", "Choose a subject and write at least 10 characters.", "Press Send — the message is stored in the database.", "An admin can read it from their Account page."], ""],
+  consent: ["Data Consent — your choices", ["Essential is always on: your sign-in and the display settings you pick.", "Analytics, Marketing and AI processing stay OFF until you switch them on.", "Use Accept all, Reject non-essential, or set each one and press Save preferences.", "Switching one off also deletes whatever it had collected."], "Tip: with AI processing off, your answers are graded by the built-in rules on the server and never leave it."],
+  privacy: ["Data Privacy — what we keep", ["The table lists every kind of data we store and why we store it.", "Download my data gives you a JSON file with everything about your account.", "Delete my account & data erases it all permanently, after you type DELETE.", "To stop appearing in college lists without deleting, use the checkbox on your Profile."], "Your password is never stored — only an unreadable hash, and it is never included in the download."],
   guide: ["How to use SkillForge AI", ["Start on the Dashboard with the sample learner, or create your own profile.", "Follow the 6 feature pages in order: Profile → Analysis → Career → Learning → Progress → Mentor.", "Prove skills in the Skill Arena and see your position on the Skill World map.", "Change your goal anytime — nothing you mastered is lost."], ""],
 };
 function note(tab) {
@@ -275,13 +327,50 @@ const head = (title, sub, extra = "") => `<div class="page-head"><div><h1>${titl
 /* ===================== Page rendering ===================== */
 function renderPage() {
   const el = $("#page"); if (!el) return;
-  const fns = { app: pDashboard, profile: pProfile, analysis: pAnalysis, career: pCareer, learn: pLearn, world: pWorld, arena: pArena, progress: pProgress, mentor: pMentor, org: pOrg, guide: pGuide };
-  const needsLearner = !["profile", "org", "guide"].includes(PAGE);
+  stopGame();
+  const c = pageCtx(), w = (fn) => (el) => fn(el, c);
+  const fns = { app: pDashboard, profile: pProfile, analysis: pAnalysis, career: pCareer, learn: pLearn, world: pWorld, arena: pArena, progress: pProgress, mentor: pMentor, org: pOrg, guide: pGuide,
+    signup: w(P2.pSignup), login: w(P2.pLogin), account: w(P2.pAccount), colleges: w(P2.pColleges), places: w(P2.pPlaces), browse: w(P2.pBrowse), faculty: w(P2.pFaculty), portal: w(P2.pPortal),
+    compete: w(P2.pCompete), agents: w(P2.pAgents), games: w(P2.pGames), about: w(P2.pAbout), contact: w(P2.pContact),
+    consent: w(PV.pConsent), privacy: w(PV.pPrivacy) };
+  const needsLearner = ["app", "analysis", "career", "learn", "world", "arena", "progress", "mentor", "games", "compete"].includes(PAGE);
   if (needsLearner && !S.learner) { el.innerHTML = note(PAGE) + `<div class="card"><h3>No learner yet</h3><p class="muted">Create a profile to start.</p><a class="btn primary" href="profile.html?new=1">Create profile</a></div>`; return; }
-  (fns[PAGE] || pDashboard)(el);
-  el.querySelectorAll("[data-count]").forEach((c) => countUp(c, +c.dataset.count, 1100, c.dataset.suffix || ""));
-  requestAnimationFrame(() => el.querySelectorAll(".meter > span[data-w]").forEach((m) => (m.style.width = m.dataset.w + "%")));
-  el.querySelectorAll("[data-scramble]").forEach((s) => scramble(s, undefined, 700));
+  const out = (fns[PAGE] || pDashboard)(el);
+  if (needsLearner || PAGE === "profile") Promise.resolve(out).then(() => {
+    if (S.learner && S.canEdit === false && !el.querySelector(".ro-banner")) el.querySelector(".page-head")?.insertAdjacentHTML("afterend", `<div class="demo-banner ro-banner" role="note">👁 <b>View only.</b> You are looking at ${esc(S.learner.name)}'s profile as ${esc(S.user?.role || "a guest")}. Only the student can change it.</div>`);
+    else if (S.learner?.demo && !el.querySelector(".ro-banner") && PAGE === "app") el.querySelector(".page-head")?.insertAdjacentHTML("afterend", `<div class="demo-banner ro-banner" role="note">🧪 <b>${esc(S.learner.name)} is a sample learner</b> — fictional data anyone can try things on. <a href="signup.html">Create a free account</a> to get your own private profile.</div>`);
+  });
+  Promise.resolve(out).then(() => { animate(el); mountAll(el); el.querySelectorAll("[data-scramble]").forEach((x) => scramble(x, undefined, 700)); });
+}
+function animate(root) {
+  root.querySelectorAll("[data-count]").forEach((x) => countUp(x, +x.dataset.count, 1100, x.dataset.suffix || ""));
+  requestAnimationFrame(() => root.querySelectorAll(".meter > span[data-w]").forEach((m) => (m.style.width = m.dataset.w + "%")));
+}
+/* Forms rendered inside the modal overlay do not trigger implicit submission in every browser,
+   so wire the submit button's click as well as the form's submit event. */
+function onSubmit(form, handler) {
+  if (!form) return;
+  const run = (e) => { if (e && e.preventDefault) e.preventDefault(); return handler(e); };
+  form.onsubmit = run;
+  const btn = form.querySelector("button[type=submit]");
+  if (btn) btn.onclick = run;
+}
+function gmodal(title, html) { $("#gmodal-title").innerHTML = title; $("#gmodal-body").innerHTML = html; $("#gmodal").hidden = false; $("#gmodal-close").focus(); }
+function pageCtx() {
+  return { S, api, esc, head, note, toast, sound, confetti, meter, ring, animate, modal: gmodal, runAssess, store: arenaStore, saveStore: saveArena,
+    go: (href, label) => portalTo(href, innerWidth / 2, innerHeight / 2, label), speak: (t) => S.voice?.say(t),
+    closeModal: () => ($("#gmodal").hidden = true), track: PV.track, onSubmit };
+}
+function renderUser() {
+  const slot = $("#user-slot"); if (!slot) return; const u = S.user;
+  slot.innerHTML = u ? `<a class="user-chip" href="account.html" data-tip="Your account — ${esc(u.role)}${u.institution ? " at " + esc(u.institution) : ""}"><span class="ua">${esc((u.name || "?")[0].toUpperCase())}</span>${esc(u.name.split(" ")[0])} <small>${esc(u.role)}</small></a>`
+    : `<a class="btn ghost sm" href="login.html" data-tip="Sign in to your account">Sign in</a> <a class="btn primary sm" href="signup.html" data-tip="Create a student or faculty account">Sign up</a>`;
+  const nl = $("#new-learner");
+  if (nl && u) {
+    if (u.role === "student") { nl.href = "profile.html"; nl.textContent = "✎ Edit my profile"; nl.dataset.tip = "Update your skills, certificates, projects and goal"; }
+    else if (u.role === "admin" && !u.demo) { nl.href = "profile.html?new=1"; nl.textContent = "+ New learner"; nl.dataset.tip = "Admins can add learner profiles"; }
+    else { nl.href = "portal.html"; nl.textContent = "🏫 My students"; nl.dataset.tip = "Open the faculty portal"; }
+  }
 }
 const statusBadge = (s) => ({ met: "ok", partial: "warn", missing: "bad" }[s] || "");
 const confBadge = (c) => ({ verified: "ok", evidence: "brand" }[c] || "");
@@ -304,8 +393,8 @@ function pDashboard(el) {
     <div class="card stat"><div class="label">${d ? "Dream company" : "Job-ready in"}</div>${d ? `<div class="value sm">${esc(d.company)}</div><div class="small">${d.readiness}% ready as ${esc(d.role)}</div>` : `<div class="value"><span data-count="${rm.eta_weeks || 0}">0</span><span class="muted" style="font-size:18px"> weeks</span></div>`}</div>
   </div>
   <div class="grid g2" style="margin-top:16px">
-    <div class="card"><div class="mentor"><div class="mentor-orb" id="mentor-orb"></div><div>
-      <h3>AI Mentor <span class="badge brand">${esc(mentor.source || "")}</span></h3><div class="mentor-msg" id="mentor-msg"></div>
+    <div class="card"><div class="mentor"><div id="mentor-orb" data-tip="${esc(DOLLS.mentor.name)}, your mentor agent">${dollHtml("mentor", 72, 'data-mood="talk"')}</div><div>
+      <h3>AI Mentor <span class="small muted">· ${esc(DOLLS.mentor.name)}</span> <span class="badge brand">${esc(mentor.source || "")}</span></h3><div class="mentor-msg" id="mentor-msg" aria-live="polite"></div>
       <ol class="next-list">${(mentor.next_actions || []).map((a, i) => `<li><b>0${i + 1}</b>${esc(a)}</li>`).join("")}</ol>
       <div class="row" style="margin-top:14px">${rm.active ? `<button class="btn primary sm" data-assess="${esc(rm.active)}" data-cursor="Test">Assess ${esc(rm.active)}</button><a class="btn ghost sm" href="arena.html">🎮 Arena</a>` : ""}<a class="btn ghost sm" href="world.html">🗺 Where am I?</a></div>
     </div></div></div>
@@ -315,7 +404,7 @@ function pDashboard(el) {
   <div class="portal-grid">${FEATURES6.map(([id, num, title, desc, col]) => `<a class="glass tilt feature-card portal-card" href="${id}.html" style="--ac:${col}" data-cursor="Enter"><span class="num">FEATURE ${num}</span><h3>${title}</h3><p>${desc}</p><span class="enter">Enter →</span><button class="newtab" data-href="${id}.html" title="Open in a new page">↗</button></a>`).join("")}</div>
   <div class="card" style="margin-top:16px"><h3>🏅 Achievements</h3>${achHtml(L)}</div>`;
   radar($("#radar"), m.skills || []);
-  const orb = $("#mentor-orb"); orb.classList.add("talking"); typewrite($("#mentor-msg"), mentor.message || "", 12, () => orb.classList.remove("talking"));
+  const md = mountAll($("#mentor-orb")).mentor; typewrite($("#mentor-msg"), mentor.message || "", 12, () => md?.set("idle"));
 }
 function radar(host, rows) {
   if (!rows.length) return;
@@ -347,9 +436,10 @@ function pProfile(el) {
   <div class="grid g2">
     <div class="card">
       <div class="row"><div class="field grow"><label class="lbl">Full name</label><input id="p-name" value="${esc(L.name)}"></div><div class="field grow"><label class="lbl">Email</label><input id="p-email" value="${esc(L.email)}"></div></div>
-      <div class="row"><div class="field grow"><label class="lbl">Degree / course</label><input id="p-edu" value="${esc(L.education)}" placeholder="e.g. MCA, B.E. Mechanical, B.Com"></div><div class="field grow"><label class="lbl">College / organisation</label><input id="p-org" value="${esc(L.organization)}"></div></div>
+      <div class="row"><div class="field grow"><label class="lbl">Degree / course</label><input id="p-edu" value="${esc(L.education)}" placeholder="e.g. MCA, B.E. Mechanical, B.Com"></div><div class="field grow"><label class="lbl" for="p-inst">College / university</label><select id="p-inst" data-tip="Choose your institution — it places you in the college and city lists"><option value="">— choose —</option>${S.meta.institutions.map((i) => `<option value="${esc(i.id)}" ${i.id === L.institution_id ? "selected" : ""}>${esc(i.name)}${i.city ? " — " + esc(i.city) : ""}</option>`).join("")}</select></div></div>
       <div class="row"><div class="field grow"><label class="lbl">Career goal (any industry)</label><select id="p-role">${roleOptions(L.target_role || "Full Stack Developer")}</select></div><div class="field" style="width:140px"><label class="lbl">Hours / week</label><input id="p-hours" type="number" min="1" max="60" value="${esc(L.hours_per_week || 8)}"></div></div>
       <div class="row"><div class="field grow"><label class="lbl">Dream company</label><select id="p-dream">${companyOptions(L.dream_company)}</select></div><div class="field grow"><label class="lbl">Interests</label><input id="p-int" value="${esc(L.interests)}" placeholder="e.g. automobiles, analytics"></div></div>
+      <label class="check" data-tip="When on, your name, college, goal and readiness appear in college lists and the leaderboard. Your email, skills detail and test history are never shown."><input type="checkbox" id="p-listed" ${L.listed === false ? "" : "checked"}> Show me in college lists and the leaderboard</label>
       <label class="lbl">Existing skills</label><div class="list-edit" id="p-skills">${(L.skills || []).map(skillItem).join("")}</div><button class="btn ghost sm" data-add="p-skills:skillItem">+ Add skill</button>
       <label class="lbl" style="margin-top:16px">Certifications</label><div class="list-edit" id="p-certs">${(L.certifications || []).map(certItem).join("")}</div><button class="btn ghost sm" data-add="p-certs:certItem">+ Add certification</button>
       <label class="lbl" style="margin-top:16px">Projects</label><div class="list-edit" id="p-projs">${(L.projects || []).map(projItem).join("")}</div><button class="btn ghost sm" data-add="p-projs:projItem">+ Add project</button>
@@ -374,9 +464,9 @@ document.addEventListener("click", (e) => {
 });
 const readList = (id) => $$(`#${id} .item`).map((row) => { const o = {}; $$("[data-k]", row).forEach((i) => (o[i.dataset.k] = i.value.trim())); return o; }).filter((o) => o.name);
 async function saveProfile(id) {
-  const body = { id, name: $("#p-name").value.trim(), email: $("#p-email").value.trim(), education: $("#p-edu").value.trim(), organization: $("#p-org").value.trim(),
+  const body = { id, name: $("#p-name").value.trim(), email: $("#p-email").value.trim(), education: $("#p-edu").value.trim(), institution_id: $("#p-inst").value,
     hours_per_week: Number($("#p-hours").value) || 8, target_role: $("#p-role").value, dream_company: $("#p-dream").value, interests: $("#p-int").value.trim(),
-    skills: readList("p-skills"), certifications: readList("p-certs"), projects: readList("p-projs") };
+    listed: $("#p-listed") ? $("#p-listed").checked : true, skills: readList("p-skills"), certifications: readList("p-certs"), projects: readList("p-projs") };
   if (!body.name) return toast("Please enter a name");
   try {
     const r = await api("api/learners", body); await loadLearners();
@@ -504,11 +594,13 @@ function pLearn(el) {
       <div class="weeks">${(rm.weeks || []).slice(0, 10).map((w, wi) => { const used = w.items.reduce((a, b) => a + b.hours, 0); return `<div class="week"><b>WEEK ${w.week}</b><div class="week-bar">${w.items.map((it) => `<span style="flex:${it.hours};background:${it.item.startsWith("Remedial") ? "#ff4d5e" : colorFor(it.item)};animation-delay:${wi * 80}ms" title="${esc(it.item)} · ${it.hours}h">${esc(it.item)} ${it.hours}h</span>`).join("")}${used < hpw ? `<span style="flex:${hpw - used};background:rgba(255,255,255,.05)"></span>` : ""}</div></div>`; }).join("") || '<p class="muted">Nothing left — every milestone is mastered! 🎉</p>'}
       ${(rm.weeks || []).length > 10 ? `<p class="small muted">+ ${rm.weeks.length - 10} more weeks</p>` : ""}</div></div>
   </div>`;
-  $$(".node", el).forEach((n) => (n.onclick = () => { S.selected = n.dataset.node; $$(".node", el).forEach((x) => x.classList.toggle("selected", x === n)); $("#node-detail").innerHTML = nodeDetail(nodes.find((x) => x.id === S.selected)); bindDetail(); sound.play("click"); }));
+  $$(".node", el).forEach((n) => (n.onclick = () => { S.selected = n.dataset.node; $$(".node", el).forEach((x) => x.classList.toggle("selected", x === n)); $("#node-detail").innerHTML = nodeDetail(nodes.find((x) => x.id === S.selected)); mountAll($("#node-detail")); bindDetail(); sound.play("click"); }));
   bindDetail();
 }
 function nodeDetail(n) {
-  return `<h3>${esc(n.title || n.skill)} <span class="badge">${esc(n.esco)}</span></h3>
+  const gid = guideForSkill(n.skill), g = DOLLS[gid];
+  return `<div class="guide-strip" style="--ac:${g.color}" data-tip="${esc(g.name)} is the ${esc(g.role)} — the guide for ${esc(n.skill)}">${dollHtml(gid, 76, n.is_remedial ? 'data-mood="think"' : 'data-mood="wave"')}<div><b>${esc(g.name)}</b> <span class="small muted">· ${esc(g.role)}</span><div class="small">${esc(n.is_remedial ? "Let's fix the parts you missed, one at a time." : g.line)}</div></div></div>
+    <h3>${esc(n.title || n.skill)} <span class="badge">${esc(n.esco)}</span></h3>
     <p class="small muted">${STATUS_TEXT[n.status] || ""}${(n.prerequisites || []).length ? ` · needs ${n.prerequisites.map((p) => esc(p.replace("|", " or "))).join(", ")}` : ""}</p>
     ${n.is_remedial ? `<p>Targets what you missed: ${(n.missed_concepts || []).map((c) => `<span class="badge bad">${esc(pretty(c))}</span>`).join("")}${n.attempts > 1 ? ` <span class="badge warn">attempt #${n.attempts}</span>` : ""}</p>` : ""}
     ${n.format_note ? `<p class="small" style="color:var(--amber)">↺ ${esc(n.format_note)}</p>` : ""}
@@ -729,15 +821,19 @@ function onScroll() { const max = document.documentElement.scrollHeight - innerH
 async function boot() {
   if (PAGE !== "home") injectChrome();
   injectCommon();
+  theme.initTheme();
   let pct = 0; const lp = $("#loader-pct"), lb = $("#loader-bar");
   if ($(".loader-label")) scramble($(".loader-label"));
   const lt = setInterval(() => { pct = Math.min(96, pct + Math.random() * 14); lp.textContent = Math.round(pct); lb.style.width = pct + "%"; }, 60);
 
-  const gl = $("#gl");
-  try { S.scene = createScene(gl, { reduced }); } catch (e) { console.warn("WebGL failed", e); }
+  const gl = $("#gl"), calm = theme.isMinimal() || theme.motionOff();
+  if (calm) S.scene = { setProgress() {}, setMode() {}, pulse() {}, warp() {}, setAccent() {} };     // no 3D in calm modes
+  else { try { S.scene = createScene(gl, { reduced }); } catch (e) { console.warn("WebGL failed", e); } }
   if (!S.scene) S.scene = createFallback(gl);
   if (PAGE !== "home") S.scene.setMode("app");
-  initCursor(); interactions();
+  S.scene.setAccent?.(...theme.accentPair());
+  theme.onChange(() => S.scene.setAccent?.(...theme.accentPair()));
+  initCursor(); if (!calm) interactions();
 
   await detectMode();
   S.meta = await api("api/meta");
@@ -745,13 +841,18 @@ async function boot() {
   if (pill) { pill.classList.add("live"); pill.textContent = S.mode === "web" ? "● Web · in-browser agents" : `● Server · ${S.health.agent_engine}${/active/.test(S.health.gemini) ? " · Gemini" : ""}`;
     pill.title = S.mode === "web" ? "No server needed: the 8 agents run in your browser and data stays on this device." : `FastAPI backend · Gemini: ${S.health.gemini}`; }
 
+  try { S.user = (await api("api/auth/me")).user; } catch (_) { S.user = null; }
+  renderUser();
+  await PV.initConsent(api);                 // load the saved choice before anything optional runs
+  PV.consentBanner(pageCtx());               // ask, if they have not chosen yet
+  PV.track("page:" + PAGE);                  // no-op until analytics is consented to
   if (PAGE === "home") {
     renderLanding();
     S.explainer = createExplainer({ canvas: $("#explainer"), caption: $("#player-caption"), fill: $("#player-fill"), time: $("#player-time"), playBtn: $("#player-play"), bigBtn: $("#player-big"), track: $("#player-track"), chaptersEl: $("#player-chapters"), recBtn: $("#player-rec"), fsBtn: $("#player-fs"), player: $("#player"), onPlay: () => sound.play("click") });
     addEventListener("scroll", onScroll, { passive: true });
   } else {
     await loadLearners();
-    const want = (() => { try { return localStorage.getItem("sf-learner"); } catch (_) { return null; } })() || "jane-doe";
+    const want = S.user?.learner_id || (() => { try { return localStorage.getItem("sf-learner"); } catch (_) { return null; } })() || "jane-doe";
     if (S.learners.length) await selectLearner(S.learners.find((l) => l.id === want) ? want : S.learners[0].id, false);
     renderPage();
     $("#learner-select").onchange = (e) => selectLearner(e.target.value);
@@ -764,6 +865,10 @@ async function boot() {
     if (PAGE === "home") { observeReveals(); $$(".hero [data-scramble]").forEach((el, i) => setTimeout(() => scramble(el, undefined, 1100), 200 + i * 250)); if (location.hash) document.getElementById(location.hash.slice(1))?.scrollIntoView(); }
   }, 300);
 
+  S.voice = initVoice({ getLearner: () => S.learner, toast, go: (href, label) => portalTo(href, 40, innerHeight - 40, label),
+    ask: async (q) => (await api(`api/learners/${S.learner.id}/chat`, { question: q })).answer });
+  $("#gmodal-close").onclick = () => ($("#gmodal").hidden = true);
+  $("#gmodal").onclick = (e) => e.target.id === "gmodal" && ($("#gmodal").hidden = true);
   $("#modal-close").onclick = closeModal;
   $("#modal").onclick = (e) => e.target.id === "modal" && closeModal();
   $("#modal-seg").onclick = (e) => e.target.dataset.mode && setMode(e.target.dataset.mode);
@@ -772,7 +877,7 @@ async function boot() {
   $("#btn-cursor").onclick = (e) => { e.stopPropagation(); $("#cursor-menu").hidden = !$("#cursor-menu").hidden; };
   $("#cursor-menu").onclick = (e) => { const m = e.target.dataset.mode; if (m) { setCursor(m); toast("Cursor: " + e.target.textContent.trim()); $("#cursor-menu").hidden = true; } };
   document.addEventListener("click", (e) => { if (!e.target.closest(".cursor-picker")) $("#cursor-menu").hidden = true; });
-  document.addEventListener("keydown", (e) => { if (e.key === "Escape") closeModal(); });
+  document.addEventListener("keydown", (e) => { if (e.key === "Escape") { closeModal(); $("#gmodal").hidden = true; } });
   document.addEventListener("pointerover", (e) => { if (e.target.closest?.(".btn, .side-nav a, .chip, .portal-card")) sound.play("hover"); });
   addEventListener("pageshow", (e) => { if (e.persisted) $("#portal")?.classList.remove("go"); });
 }

@@ -23,7 +23,7 @@ const lerp = (a, b, p) => a + (b - a) * p;
 export function createExplainer({ canvas, caption, fill, time, playBtn, bigBtn, track, chaptersEl, recBtn, fsBtn, player, onPlay }) {
   const ctx = canvas.getContext("2d");
   let t = 0, playing = false, last = 0, recorder = null;
-  chaptersEl.innerHTML = CHAPTERS.slice(1).map((c) => `<span style="left:${(c.t / DUR) * 100}%" title="${c.name}"></span>`).join("");
+  chaptersEl.innerHTML = CHAPTERS.slice(1).map((c) => `<span style="left:${(c.t / DUR) * 100}%" title="${c.name.replace(/[&<>"]/g, "")}"></span>`).join("");
 
   function rr(x, y, w, h, r) { ctx.beginPath(); ctx.roundRect(x, y, w, h, r); }
   function text(s, x, y, size = 20, color = C.ink, weight = 500, align = "left", font = "Space Grotesk") { ctx.font = `${weight} ${size}px "${font}", system-ui, sans-serif`; ctx.fillStyle = color; ctx.textAlign = align; ctx.fillText(s, x, y); }
