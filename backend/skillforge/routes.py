@@ -27,6 +27,8 @@ ROUTES: List[Tuple[str, str, Handler]] = [
     ("POST", r"/api/learners/(?P<lid>[\w-]+)/chat", lambda p, q, b: s.mentor_chat(p["lid"], b.get("question", ""))),
     ("POST", r"/api/resume/extract", lambda p, q, b: s.extract_resume(b.get("text", ""))),
     ("GET", r"/api/quiz", lambda p, q, b: s.quiz(q.get("skill", ""))),
+    ("POST", r"/api/quiz/check",
+     lambda p, q, b: s.quiz_check(b.get("skill", ""), b.get("index"), b.get("answer"))),
     ("GET", r"/api/cohort", lambda p, q, b: s.cohort(q.get("organization") or None)),
     ("POST", r"/api/demo/reset", lambda p, q, b: s.seed_demo(reset=True)),
 ]

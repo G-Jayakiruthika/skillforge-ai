@@ -11,8 +11,8 @@ from collections import defaultdict
 from typing import Any, Dict, List, Optional
 
 from . import agents, graph, llm, store
-from .knowledge import (ESCO_CODES, LEVEL_SCORES, MASTERY_PASS, PREREQUISITES, ROLE_BENCHMARKS,
-                        ROLE_DESCRIPTIONS, SKILLS)
+from .knowledge import (COMPANIES, COMPANY_NOTE, ESCO_CODES, INDUSTRIES, LEVEL_SCORES, MASTERY_PASS, PREREQUISITES,
+                        ROLE_BENCHMARKS, ROLE_DESCRIPTIONS, ROLE_INDUSTRY, SKILLS)
 
 
 class NotFound(Exception):
@@ -24,7 +24,7 @@ class BadRequest(Exception):
 
 
 PROFILE_FIELDS = ("name", "email", "organization", "target_role", "hours_per_week", "skills",
-                  "certifications", "projects", "interests")
+                  "certifications", "projects", "interests", "dream_company", "education")
 
 
 def _result(state: Dict[str, Any]) -> Dict[str, Any]:
@@ -50,8 +50,10 @@ def health() -> Dict[str, Any]:
 
 def meta() -> Dict[str, Any]:
     return {
-        "roles": [{"name": r, "description": ROLE_DESCRIPTIONS.get(r, ""), "skills": b}
+        "roles": [{"name": r, "description": ROLE_DESCRIPTIONS.get(r, ""), "skills": b, "industry": ROLE_INDUSTRY.get(r)}
                   for r, b in ROLE_BENCHMARKS.items()],
+        "industries": INDUSTRIES,
+        "companies": COMPANIES, "company_note": COMPANY_NOTE,
         "skills": [{"name": s, "esco": ESCO_CODES.get(s), "prerequisites": PREREQUISITES.get(s, []),
                     "hours": SKILLS[s]["hours"]} for s in SKILLS],
         "levels": list(LEVEL_SCORES),
@@ -100,6 +102,17 @@ def quiz(skill: str) -> Dict[str, Any]:
         raise NotFound(f"Unknown skill '{skill}'")
     return {"skill": skill, "pass_mark": MASTERY_PASS, "explain_prompt": info["explain_prompt"],
             "questions": [{"q": q["q"], "options": q["options"]} for q in info["quiz"]]}
+
+
+def quiz_check(skill: str, index: int, answer: Optional[int]) -> Dict[str, Any]:
+    """Instant feedback for one question (used by the Skill Arena game)."""
+    info = SKILLS.get(skill)
+    if not info:
+        raise NotFound(f"Unknown skill '{skill}'")
+    if not isinstance(index, int) or not 0 <= index < len(info["quiz"]):
+        raise BadRequest("index out of range")
+    q = info["quiz"][index]
+    return {"correct": answer == q["answer"], "correct_index": q["answer"], "concept": q["concept"]}
 
 
 def assess(learner_id: str, skill: str, mode: str = "quiz", answers: Optional[List[Optional[int]]] = None,
@@ -209,11 +222,12 @@ def seed_demo(reset: bool = False) -> Dict[str, Any]:
                     {"name": "basic HTML", "level": "beginner"}],
          "certifications": [{"name": "HackerRank SQL (Basic)"}],
          "projects": [{"name": "Student marks analyser", "description": "Python script that loads marks from a MySQL database and prints reports"}],
-         "interests": "web apps, startups"},
+         "interests": "web apps, startups", "dream_company": "Zoho", "education": "MCA"},
         {"id": "arjun-k", "name": "Arjun K", "target_role": "Data Engineer", "hours_per_week": 10,
          "skills": [{"name": "py", "level": "intermediate"}, {"name": "postgres", "level": "advanced"},
                     {"name": "excel", "level": "intermediate"}],
-         "certifications": [], "projects": [{"name": "Sales ETL", "description": "Python + SQL ETL into a star schema"}]},
+         "certifications": [], "projects": [{"name": "Sales ETL", "description": "Python + SQL ETL into a star schema"}],
+         "dream_company": "Amazon", "education": "B.Tech IT"},
         {"id": "meera-s", "name": "Meera S", "target_role": "Frontend Developer", "hours_per_week": 6,
          "skills": [{"name": "HTML", "level": "advanced"}, {"name": "CSS", "level": "advanced"},
                     {"name": "vanilla js", "level": "beginner"}, {"name": "github", "level": "intermediate"}],
@@ -224,7 +238,23 @@ def seed_demo(reset: bool = False) -> Dict[str, Any]:
         {"id": "fatima-n", "name": "Fatima N", "target_role": "Backend Developer (Python)", "hours_per_week": 12,
          "skills": [{"name": "python3", "level": "advanced"}, {"name": "flask", "level": "intermediate"},
                     {"name": "mysql", "level": "intermediate"}, {"name": "git", "level": "intermediate"}],
-         "certifications": [{"name": "AWS Cloud Practitioner"}], "projects": [{"name": "Library REST API", "description": "Flask REST API with MySQL and Docker"}]},
+         "certifications": [{"name": "AWS Cloud Practitioner"}], "projects": [{"name": "Library REST API", "description": "Flask REST API with MySQL and Docker"}],
+         "dream_company": "Google", "education": "BCA"},
+        {"id": "karthik-r", "name": "Karthik R", "target_role": "Mechanical Design Engineer", "hours_per_week": 7,
+         "skills": [{"name": "autocad", "level": "intermediate"}, {"name": "cnc", "level": "beginner"}],
+         "certifications": [{"name": "SolidWorks CSWA"}], "projects": [{"name": "Go-kart chassis", "description": "Designed the frame in SolidWorks and checked machining"}],
+         "dream_company": "Tata Motors", "education": "B.E. Mechanical"},
+        {"id": "priya-m", "name": "Priya M", "target_role": "Financial Analyst", "hours_per_week": 6,
+         "skills": [{"name": "tally", "level": "intermediate"}, {"name": "excel", "level": "intermediate"}, {"name": "gst", "level": "beginner"}],
+         "certifications": [], "projects": [], "dream_company": "Deloitte", "education": "B.Com"},
+        {"id": "sanjay-v", "name": "Sanjay V", "target_role": "Embedded Systems Engineer", "hours_per_week": 9,
+         "skills": [{"name": "c", "level": "intermediate"}, {"name": "arduino", "level": "intermediate"}, {"name": "digital electronics", "level": "beginner"}],
+         "certifications": [], "projects": [{"name": "Smart irrigation", "description": "Arduino soil sensor with IoT alerts over MQTT"}],
+         "dream_company": "Bosch", "education": "B.E. ECE"},
+        {"id": "divya-s", "name": "Divya S", "target_role": "Clinical Research Associate", "hours_per_week": 5,
+         "skills": [{"name": "medical terminology", "level": "intermediate"}, {"name": "communication", "level": "intermediate"}],
+         "certifications": [{"name": "GCP training certificate (clinical research)"}], "projects": [],
+         "dream_company": "IQVIA", "education": "B.Pharm"},
     ]
     for p in people:
         save_profile({**p, "organization": DEMO_ORG})
@@ -236,4 +266,7 @@ def seed_demo(reset: bool = False) -> Dict[str, Any]:
     assess("rahul-p", "SQL", answers=_quiz_answers("SQL", 1))
     assess("fatima-n", "Python", answers=_quiz_answers("Python", 3))
     log_progress("fatima-n", "REST APIs", 3, "FastAPI tutorial")
+    assess("karthik-r", "CAD Design", answers=_quiz_answers("CAD Design", 3))
+    assess("priya-m", "Financial Accounting", answers=_quiz_answers("Financial Accounting", 1))
+    assess("sanjay-v", "C Programming", answers=_quiz_answers("C Programming", 2))
     return {"seeded": True, "learners": len(store.all_learners())}

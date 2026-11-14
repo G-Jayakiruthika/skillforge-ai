@@ -41,7 +41,7 @@ SYNONYMS: Dict[str, str] = {
     "airflow": "Airflow", "apache airflow": "Airflow",
     "pandas": "Pandas", "numpy": "Pandas", "data analysis": "Pandas",
     "statistics": "Statistics", "stats": "Statistics", "probability": "Statistics",
-    "power bi": "Power BI", "powerbi": "Power BI", "tableau": "Power BI", "excel": "Power BI",
+    "power bi": "Power BI", "powerbi": "Power BI", "tableau": "Power BI",
     "dashboards": "Power BI",
 }
 
@@ -443,6 +443,23 @@ SKILLS: Dict[str, Dict[str, Any]] = {
         ],
     },
 }
+
+
+# ---------------------------------------------------------------------------
+# Multi-industry extension (industries.py) + company catalogue
+# ---------------------------------------------------------------------------
+from . import industries as _ind  # noqa: E402
+
+SYNONYMS.update(_ind.SYNONYMS)
+ESCO_CODES.update(_ind.ESCO_CODES)
+PREREQUISITES.update(_ind.PREREQUISITES)
+ROLE_BENCHMARKS.update(_ind.ROLE_BENCHMARKS)
+ROLE_DESCRIPTIONS.update(_ind.ROLE_DESCRIPTIONS)
+SKILLS.update(_ind.SKILLS)
+INDUSTRIES = _ind.INDUSTRIES
+COMPANIES = _ind.COMPANIES
+COMPANY_NOTE = _ind.COMPANY_NOTE
+ROLE_INDUSTRY = {r: ind for ind, v in INDUSTRIES.items() for r in v["roles"]}
 
 
 def skill_hours(skill: str) -> int:

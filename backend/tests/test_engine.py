@@ -83,7 +83,7 @@ def test_progress_and_cohort_and_routes():
     L = service.log_progress("jane-doe", "HTML/CSS", 3)["learner"]
     assert sum(e["hours"] for e in L["study_log"]) == 3
     c = service.cohort()
-    assert c["learners"] == 5 and c["skill_gaps"]
+    assert c["learners"] == 9 and c["skill_gaps"]
     assert routes.dispatch("GET", "/api/health", {}, {})[0] == 200
     assert routes.dispatch("GET", "/api/learners/nope", {}, {})[0] == 404
     assert routes.dispatch("POST", "/api/learners/jane-doe/pivot", {}, {"target_role": "Astronaut"})[0] == 400
@@ -95,3 +95,13 @@ def test_resume_extraction():
     r = service.extract_resume("Built REST APIs with Express and React.js; comfortable with PostgreSQL and Git")
     names = {s["name"] for s in r["skills"]}
     assert {"React", "Node.js", "SQL", "Git", "REST APIs"} <= names
+
+
+def test_company_matching_and_industries():
+    m = jane()["match"]
+    assert m["dream"]["company"] == "Zoho" and 0 <= m["dream"]["readiness"] <= 100
+    assert len(m["industry_ranking"]) == 9
+    assert all("Full Stack Developer" in c["role"] for c in m["companies_for_role"])
+    karthik = service.get_learner("karthik-r")["learner"]["match"]
+    assert karthik["industry"] == "Mechanical & Manufacturing"
+    assert service.get_learner("priya-m")["learner"]["proficiency"]["Advanced Excel"]["score"] > 0  # 'excel' -> Advanced Excel

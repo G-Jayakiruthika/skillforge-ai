@@ -3,69 +3,144 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>SkillForge AI - Adaptive Career & Learning Engine</title>
-  <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 32 32%22><rect width=%2232%22 height=%2232%22 rx=%228%22 fill=%22%234f46e5%22/><text x=%2216%22 y=%2221%22 font-size=%2214%22 text-anchor=%22middle%22 fill=%22white%22 font-family=%22sans-serif%22>SF</text></svg>" />
-  <link rel="stylesheet" href="/static/styles.css" />
+  <title>SkillForge AI - Forge your career with 8 AI agents</title>
+  <meta name="description" content="An AI-powered, multi-agent learning platform that finds your skill gaps, builds a personalised roadmap and adapts as you learn." />
+  <meta name="theme-color" content="#05060f" />
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 32 32%22><rect width=%2232%22 height=%2232%22 rx=%228%22 fill=%22%2305060f%22/><path d=%22M8 22 16 6l8 16-8-5z%22 fill=%22%233cf0ff%22/></svg>" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;600&family=Space+Grotesk:wght@400;500;600;700&display=swap" rel="stylesheet" media="print" onload="this.media='all'" />
+  <link rel="stylesheet" href="css/app.css" />
 </head>
-<body>
-  <header class="topbar">
-    <div class="brand">
-      <div class="logo">SF</div>
-      <div>
-        <div class="brand-name">SkillForge AI</div>
-        <div class="brand-sub">Multi-agent adaptive career &amp; learning engine</div>
+<body class="is-loading">
+  <!-- loader -->
+  <div id="loader" aria-hidden="true">
+    <div class="loader-core"><span class="loader-pct" id="loader-pct">0</span><span class="loader-unit">%</span></div>
+    <div class="loader-label" data-scramble>IGNITING THE FORGE</div>
+    <div class="loader-bar"><span id="loader-bar"></span></div>
+  </div>
+
+  <!-- WebGL world + cursor layers -->
+  <canvas id="gl" aria-hidden="true"></canvas>
+  <div class="grain" aria-hidden="true"></div>
+  <canvas id="cursor-canvas" aria-hidden="true"></canvas>
+  <div id="cursor-dot" aria-hidden="true"></div>
+  <div id="cursor-ring" aria-hidden="true"><span id="cursor-label"></span></div>
+  <canvas id="confetti" aria-hidden="true"></canvas>
+
+  <!-- top bar -->
+  <header class="topbar" id="topbar">
+    <a class="logo" href="#home" data-cursor="Home">
+      <svg viewBox="0 0 32 32" width="30" height="30" aria-hidden="true"><defs><linearGradient id="lg" x1="0" x2="1"><stop offset="0" stop-color="#3cf0ff"/><stop offset="1" stop-color="#ff3ea5"/></linearGradient></defs><path d="M6 24 16 4l10 20-10-6z" fill="url(#lg)"/></svg>
+      <span class="logo-text glitch" data-text="SkillForge">SkillForge</span><span class="logo-ai">AI</span>
+    </a>
+    <nav class="top-links" id="top-links">
+      <a href="#home" data-cursor="Story">Story</a>
+      <a href="#watch" data-cursor="Play">Watch</a>
+      <a href="#agents-sec" data-cursor="Meet">Agents</a>
+      <a href="#features" data-cursor="Explore">Features</a>
+      <a href="app.html" class="btn-launch magnetic" data-cursor="Launch">Launch app <span>→</span></a>
+    </nav>
+    <div class="top-tools">
+      <span class="mode-pill" id="mode-pill" title="Where the AI agents are running">…</span>
+      <button class="icon-btn" id="btn-sound" aria-label="Toggle sound" data-cursor="Sound">🔈</button>
+      <div class="cursor-picker">
+        <button class="icon-btn" id="btn-cursor" aria-label="Choose cursor style" data-cursor="Cursor">✦</button>
+        <div class="cursor-menu glass" id="cursor-menu" hidden>
+          <div class="menu-title">Cursor style</div>
+          <button data-mode="orb">◎ Orbit ring</button>
+          <button data-mode="comet">☄ Comet trail</button>
+          <button data-mode="neon">〰 Neon ribbon</button>
+          <button data-mode="spark">✺ Spark burst</button>
+          <button data-mode="system">↖ System default</button>
+        </div>
       </div>
-    </div>
-    <div class="top-actions">
-      <span id="engine-pill" class="pill">connecting...</span>
-      <select id="learner-select" aria-label="Choose learner"></select>
-      <button class="btn ghost" id="new-learner">+ New learner</button>
     </div>
   </header>
 
-  <nav class="tabs" id="tabs">
-    <button data-tab="dashboard" class="active">Dashboard</button>
-    <button data-tab="profile">Profile</button>
-    <button data-tab="roadmap">Roadmap</button>
-    <button data-tab="progress">Progress</button>
-    <button data-tab="mentor">AI Mentor</button>
-    <button data-tab="org">Organization</button>
-  </nav>
+  <!-- ======================= LANDING ======================= -->
+  <main id="landing">
+    <section class="hero" id="home">
+      <p class="eyebrow reveal"><span class="dot"></span> Multi-agent AI · Adaptive learning · Career matching</p>
+      <h1 class="hero-title"><span class="line" data-scramble>FORGE THE SKILLS</span><span class="line accent" data-scramble>YOUR CAREER NEEDS</span></h1>
+      <p class="hero-sub reveal">Eight AI agents read your skills, find the gaps for your dream role, build a step-by-step roadmap, test you like a game, and <b>re-plan the moment you struggle</b> or change your goal.</p>
+      <div class="hero-cta reveal">
+        <a class="btn primary magnetic" href="app.html" data-cursor="Go">Launch the app</a>
+        <a class="btn ghost magnetic" href="#watch" data-cursor="Play">▶ Watch how it works</a>
+      </div>
+      <div class="hero-stats reveal">
+        <div><b data-count="8">0</b><span>AI agents</span></div>
+        <div><b data-count="5">0</b><span>career roles</span></div>
+        <div><b data-count="16">0</b><span>skills mapped</span></div>
+        <div><b data-count="48">0</b><span>quiz challenges</span></div>
+      </div>
+      <div class="scroll-hint" aria-hidden="true"><span></span>scroll to explore</div>
+    </section>
 
-  <main>
-    <section id="tab-dashboard" class="tab active"></section>
-    <section id="tab-profile" class="tab"></section>
-    <section id="tab-roadmap" class="tab"></section>
-    <section id="tab-progress" class="tab"></section>
-    <section id="tab-mentor" class="tab"></section>
-    <section id="tab-org" class="tab"></section>
+    <section class="panel problem">
+      <div class="split">
+        <div>
+          <p class="kicker reveal">01 — The problem</p>
+          <h2 class="reveal">Same course.<br/>Every learner.<br/><span class="strike">Every time.</span></h2>
+        </div>
+        <div class="problem-cards">
+          <article class="glass tilt reveal"><span class="big-ico">🧭</span><h3>Nobody sees the gap</h3><p>Universities and companies can't tell what each student or employee is missing for the job they want.</p></article>
+          <article class="glass tilt reveal"><span class="big-ico">📚</span><h3>One-size-fits-all</h3><p>Traditional platforms ignore what you already know, how you are progressing and where you want to go.</p></article>
+          <article class="glass tilt reveal"><span class="big-ico">⚡</span><h3>SkillForge adapts</h3><p>A team of AI agents personalises the path and changes it the moment your goal or performance changes.</p></article>
+        </div>
+      </div>
+    </section>
+
+    <section class="panel watch" id="watch">
+      <p class="kicker reveal">02 — Watch it think</p>
+      <h2 class="reveal">One minute. Eight agents. <span class="grad">One personalised career path.</span></h2>
+      <div class="player glass reveal" id="player">
+        <canvas id="explainer" width="1280" height="720" aria-label="Animated explainer video"></canvas>
+        <div class="player-caption" id="player-caption"></div>
+        <button class="player-big-play" id="player-big" aria-label="Play explainer" data-cursor="Play">▶</button>
+        <div class="player-controls">
+          <button class="icon-btn" id="player-play" aria-label="Play or pause" data-cursor="Play">▶</button>
+          <div class="player-track" id="player-track" data-cursor="Seek"><div class="player-fill" id="player-fill"></div><div class="player-chapters" id="player-chapters"></div></div>
+          <span class="player-time" id="player-time">0:00</span>
+          <button class="icon-btn" id="player-rec" title="Save the explainer as a video file (.webm)" data-cursor="Save">⤓</button>
+          <button class="icon-btn" id="player-fs" aria-label="Fullscreen" data-cursor="Full">⛶</button>
+        </div>
+      </div>
+    </section>
+
+    <section class="panel agents-sec" id="agents-sec">
+      <p class="kicker reveal">03 — The crew</p>
+      <h2 class="reveal">Meet the agents that <span class="grad">collaborate</span> for you</h2>
+      <p class="muted reveal">Hover a card to see what each agent does. They pass messages to each other on the <b>Agent bus</b> — you can watch it live inside the app.</p>
+      <div class="agent-grid" id="agent-grid"></div>
+    </section>
+
+    <section class="panel industries">
+      <p class="kicker reveal">04 — Every student, every industry</p>
+      <h2 class="reveal">Not just coders. <span class="grad">9 industries, 14 roles, 30 employers.</span></h2>
+      <p class="muted reveal" style="max-width:720px">Mechanical, electronics, civil, commerce, management, marketing, design and healthcare students get the same personalised analysis — matched to companies that commonly hire for their role, including their dream company.</p>
+      <div class="ind-strip" id="industry-strip"></div>
+    </section>
+
+    <section class="panel features" id="features">
+      <p class="kicker reveal">05 — Open a feature</p>
+      <h2 class="reveal">Six features. <span class="grad">Each one is its own page.</span></h2>
+      <p class="muted reveal">Click to travel through the portal — or use ↗ to open a feature in a new tab.</p>
+      <div class="feature-grid" id="feature-grid"></div>
+    </section>
+
+    <section class="panel finale">
+      <h2 class="finale-title reveal"><span data-scramble>READY TO FORGE?</span></h2>
+      <p class="reveal">Start with the sample student from the problem statement — Python, SQL and basic HTML, aiming for Full Stack Developer — or create your own profile.</p>
+      <div class="hero-cta reveal">
+        <a class="btn primary magnetic" href="app.html" data-cursor="Go">Enter the forge</a>
+        <a class="btn ghost magnetic" href="arena.html" data-cursor="Play">🎮 Play Skill Arena</a>
+      </div>
+      <footer class="foot">Built with FastAPI · LangGraph · Google Gemini · Three.js — <a href="https://github.com/G-Jayakiruthika/skillforge-ai" target="_blank" rel="noopener" data-cursor="Code">source on GitHub</a></footer>
+    </section>
   </main>
 
-  <!-- Agent collaboration bus -->
-  <aside class="bus" id="bus">
-    <div class="bus-head">
-      <strong>Agent collaboration</strong>
-      <button class="icon-btn" id="bus-toggle" title="Collapse">&#8211;</button>
-    </div>
-    <ol id="bus-list"><li class="muted">Agent messages appear here after each action.</li></ol>
-  </aside>
-
-  <!-- Assessment modal -->
-  <div class="modal" id="modal" hidden>
-    <div class="modal-card" role="dialog" aria-modal="true" aria-labelledby="modal-title">
-      <div class="modal-head">
-        <h3 id="modal-title">Assessment</h3>
-        <button class="icon-btn" id="modal-close" aria-label="Close">&times;</button>
-      </div>
-      <div class="seg" id="modal-seg">
-        <button data-mode="quiz" class="active">Quiz</button>
-        <button data-mode="explain">Explain (voice / text)</button>
-      </div>
-      <div id="modal-body"></div>
-    </div>
-  </div>
-
-  <div class="toast" id="toast" hidden></div>
-  <script src="/static/app.js"></script>
+  <noscript><p style="padding:40px;color:#fff">SkillForge AI needs JavaScript enabled.</p></noscript>
+  <script type="module" src="js/main.js"></script>
 </body>
 </html>

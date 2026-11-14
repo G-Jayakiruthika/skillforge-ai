@@ -29,8 +29,8 @@ from typing import Any, Dict, Iterable, List, Optional, Set, Tuple
 
 from . import llm
 from .knowledge import (
-    ESCO_CODES, LEVEL_SCORES, MASTERY_PASS, PREREQUISITES, ROLE_BENCHMARKS,
-    ROLE_DESCRIPTIONS, SKILLS, SYNONYMS, WORKING_LEVEL, skill_hours,
+    COMPANIES, ESCO_CODES, INDUSTRIES, LEVEL_SCORES, MASTERY_PASS, PREREQUISITES, ROLE_BENCHMARKS,
+    ROLE_DESCRIPTIONS, ROLE_INDUSTRY, SKILLS, SYNONYMS, WORKING_LEVEL, skill_hours,
 )
 
 State = Dict[str, Any]
@@ -276,6 +276,23 @@ def _readiness(bench: Dict[str, int], prof: Dict[str, Dict[str, Any]]) -> int:
     return round(100 * have / total)
 
 
+def company_bench(company: Dict[str, Any], role: str) -> Dict[str, int]:
+    """Role benchmark adjusted for what this employer typically emphasises."""
+    bench = dict(ROLE_BENCHMARKS[role])
+    for f in company["focus"]:
+        bench[f] = bench[f] + 5 if f in bench else 50
+    return bench
+
+
+def company_fit(company: Dict[str, Any], role: str, prof: Dict[str, Dict[str, Any]]) -> Dict[str, Any]:
+    bench = company_bench(company, role)
+    gaps = sorted(((s, req - prof.get(s, {}).get("score", 0)) for s, req in bench.items()
+                   if prof.get(s, {}).get("score", 0) < req), key=lambda x: -x[1])
+    return {"company": company["name"], "sector": company["sector"], "type": company["type"], "role": role,
+            "readiness": _readiness(bench, prof), "gaps": [g[0] for g in gaps[:3]], "focus": company["focus"],
+            "process": company["process"]}
+
+
 def career_matcher_agent(state: State) -> State:
     learner = dict(state["learner"])
     role = learner.get("target_role") or "Full Stack Developer"
@@ -298,7 +315,33 @@ def career_matcher_agent(state: State) -> State:
     if prev and prev != role:
         transferable = [r["skill"] for r in rows if r["status"] == "met"]
 
+    industry_ranking = []
+    for ind, info in INDUSTRIES.items():
+        best = max(({"role": r, "readiness": _readiness(ROLE_BENCHMARKS[r], prof)} for r in info["roles"]),
+                   key=lambda x: x["readiness"])
+        industry_ranking.append({"industry": ind, "icon": info["icon"], "color": info["color"], **best})
+    industry_ranking.sort(key=lambda x: -x["readiness"])
+    for_role = sorted((company_fit(c, role, prof) for c in COMPANIES if role in c["roles"]),
+                      key=lambda x: -x["readiness"])
+    overall = sorted((company_fit(c, r, prof) for c in COMPANIES for r in c["roles"]), key=lambda x: -x["readiness"])
+    seen, top = set(), []
+    for f in overall:
+        if f["company"] not in seen:
+            seen.add(f["company"])
+            top.append(f)
+    dream = None
+    dc = next((c for c in COMPANIES if c["name"] == learner.get("dream_company")), None)
+    if dc:
+        dream = company_fit(dc, role if role in dc["roles"] else
+                            max(dc["roles"], key=lambda r: _readiness(company_bench(dc, r), prof)), prof)
+        dream["role_matches_goal"] = dream["role"] == role
+
     learner["match"] = {
+        "industry": ROLE_INDUSTRY.get(role),
+        "industry_ranking": industry_ranking,
+        "companies_for_role": for_role,
+        "company_top": top[:8],
+        "dream": dream,
         "role": role,
         "description": ROLE_DESCRIPTIONS.get(role, ""),
         "readiness": _readiness(bench, prof),
@@ -312,7 +355,9 @@ def career_matcher_agent(state: State) -> State:
     m = learner["match"]
     msg = (f"{role}: readiness {m['readiness']}%. Met [{', '.join(m['matched'])}] | "
            f"Partial [{', '.join(m['partial'])}] | Missing [{', '.join(m['missing'])}]. "
-           f"Closest role overall: {ranking[0]['role']} ({ranking[0]['readiness']}%).")
+           f"Closest role overall: {ranking[0]['role']} ({ranking[0]['readiness']}%). "
+           f"Matched against {len(COMPANIES)} employers in {len(INDUSTRIES)} industries"
+           + (f"; dream company {dream['company']}: {dream['readiness']}%" if dream else "") + ".")
     return {"learner": learner, "trace": _say(state, "Career Matcher", msg, to="path_architect")}
 
 
@@ -596,9 +641,12 @@ def _fallback_message(learner: Dict[str, Any], etype: str) -> str:
                 f"(about {rm.get('eta_weeks')} weeks). Keep going with {active}, then take its assessment.")
     missing = ", ".join(m.get("missing", [])) or "none"
     weak = ", ".join(w["skill"] for w in learner.get("analysis", {}).get("weaknesses", [])) or "none"
+    d = m.get("dream")
+    dream = (f" For your dream company {d['company']} ({d['role']}) you're {d['readiness']}% ready"
+             + (f" - they usually value {', '.join(d['focus'])}." if d.get("focus") else ".")) if d else ""
     return (f"Hi {name}! For {m.get('role')} you're {m.get('readiness')}% ready. Missing skills: {missing}. "
             f"Skills to strengthen: {weak}. Start with {active} - prerequisites come first so each step builds on the last. "
-            f"At {rm.get('hours_per_week'):g}h/week you can be job-ready in about {rm.get('eta_weeks')} weeks.")
+            f"At {rm.get('hours_per_week'):g}h/week you can be job-ready in about {rm.get('eta_weeks')} weeks.{dream}")
 
 
 def _next_actions(learner: Dict[str, Any]) -> List[str]:

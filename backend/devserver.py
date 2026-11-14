@@ -43,7 +43,7 @@ class Handler(BaseHTTPRequestHandler):
             query = {k: v[0] for k, v in parse_qs(url.query).items()}
             status, payload = routes.dispatch(method, url.path, query, body)
             return self._send(status, payload)
-        rel = "index.html" if url.path in ("/", "") else url.path.removeprefix("/static/").lstrip("/")
+        rel = "index.html" if url.path in ("/", "") else url.path.lstrip("/")
         f = (FRONTEND / rel).resolve()
         if FRONTEND.resolve() not in f.parents or not f.is_file():
             return self._send(404, {"detail": "Not found"})

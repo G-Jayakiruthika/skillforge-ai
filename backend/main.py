@@ -2,7 +2,7 @@
 main.py - SkillForge AI (FastAPI server).
 
 Run:   uvicorn main:app --reload --port 8000      (from the backend folder)
-Open:  http://localhost:8000          (dashboard)
+Open:  http://localhost:8000          (landing page; app.html = dashboard)
        http://localhost:8000/docs     (interactive API docs)
 """
 from __future__ import annotations
@@ -12,7 +12,7 @@ from typing import Any, Dict
 
 from fastapi import FastAPI, Request
 from fastapi.middleware.cors import CORSMiddleware
-from fastapi.responses import FileResponse, JSONResponse
+from fastapi.responses import JSONResponse
 from fastapi.staticfiles import StaticFiles
 
 from skillforge import routes, service
@@ -47,12 +47,9 @@ for _method, _pattern, _ in routes.ROUTES:
     _path = _pattern.replace(r"(?P<lid>[\w-]+)", "{lid}")
     app.add_api_route(_path, _make_endpoint(_method), methods=[_method], name=f"{_method} {_path}")
 
-app.mount("/static", StaticFiles(directory=FRONTEND), name="static")
-
-
-@app.get("/", include_in_schema=False)
-def index() -> FileResponse:
-    return FileResponse(FRONTEND / "index.html")
+# Serve every page of the frontend (index.html, app.html, analysis.html, ...) - mounted last
+# so the /api routes above take priority.
+app.mount("/", StaticFiles(directory=FRONTEND, html=True), name="frontend")
 
 
 if __name__ == "__main__":
