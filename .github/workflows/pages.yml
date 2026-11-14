@@ -22,6 +22,8 @@ jobs:
       - uses: actions/configure-pages@v5
         with:
           enablement: true
+      - name: Stamp CSS/JS references with the commit id (cache-busting)
+        run: python3 tools/stamp_assets.py frontend "$GITHUB_SHA"
       - uses: actions/upload-pages-artifact@v3
         with:
           path: frontend
