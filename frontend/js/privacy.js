@@ -71,8 +71,8 @@ export function consentBanner(c) {
   bar.id = "consent-bar";
   bar.setAttribute("role", "dialog");
   bar.setAttribute("aria-label", "Cookie and data choices");
-  bar.innerHTML = `<div class="cb-text"><b>Your data, your choice.</b> Only the essentials are on right now — your sign-in and the display settings you pick.
-      Analytics, marketing and sending text to an outside AI stay <b>off</b> until you turn them on.
+  bar.innerHTML = `<div class="cb-text"><b>Your data, your choice.</b> Only the essentials are on right now<span class="cb-full"> — your sign-in and the display settings you pick</span>.
+      Analytics, marketing and<span class="cb-full"> sending text to</span> an outside AI stay <b>off</b> until you turn them on.
       <a href="privacy.html">Read what we collect</a>.</div>
     <div class="cb-btns"><button class="btn sm" id="cb-all" data-tip="Turn on analytics, marketing and AI processing">Accept all</button>
       <button class="btn ghost sm" id="cb-ess" data-tip="Keep only what the site needs to work">Reject non-essential</button>
