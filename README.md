@@ -34,6 +34,17 @@ Each feature is its **own page** with its own address, so it can be opened in a 
 | ★ | **Adapts to goal change** | `career.html` | Mastered skills are kept, transferable skills highlighted, roadmap rebuilt in seconds. |
 | ★ | **Adapts to poor performance** | `arena.html` / any assessment | Below 60% → later milestones pause and a **remedial lab targeting only the missed concepts** is injected. Second failure → materials switch to **video + hands-on** and weak **prerequisites re-open**. |
 
+### Accounts, privacy and security
+| Area | What is implemented |
+|---|---|
+| **Accounts** | Sign up as **student** or **faculty**; sessions in HttpOnly + SameSite cookies; passwords hashed with PBKDF2-HMAC-SHA256 (600,000 rounds). Nobody can sign up as admin. |
+| **Who sees what** | A student's profile is private: only the student, faculty **of the same college**, and an admin can open it — and faculty are read-only. The sample learners (Jane Doe and friends) are a clearly-marked open sandbox. |
+| **Faculty Q&A** | Students send a question from the Faculty page; it is stored in the database and answered in the faculty portal. Email addresses are never exposed. |
+| **Data Consent tab** | Granular switches — Essential (always on), Analytics, Marketing, AI processing — with *Accept all*, *Reject non-essential*, *Save preferences* and a **Last updated** timestamp. Nothing optional runs until the user opts in; switching one off deletes what it collected. |
+| **Data Privacy tab** | Plain-language table of every kind of data kept and why (GDPR + India's DPDP Act 2023), your rights, **Download my data** (JSON) and **Delete my account & data** behind a typed confirmation. |
+| **AI consent has teeth** | With *AI processing* off, no text is sent to Gemini: the built-in rules grade it on the server instead. |
+| **Hardening** | 25-point audit script (`python security_audit.py`): no hardcoded secrets, CSRF origin check, strict CSP and 9 security headers, rate limits with login lockout, parameterised SQL, 0600 database file, sanitised forms, no PII in any log, no third-party trackers. |
+
 ### Extra ideas beyond the brief
 - **Multi-industry by design** — software, data & AI, mechanical, electronics/embedded, civil, finance, business, marketing & design, healthcare. 41 skills, 14 roles, 9 industries.
 - **Company matching** — 30 well-known employers with role-specific emphasis, so a student can prepare for a *specific* company. (Indicative data — always confirm on the company's careers page.)
@@ -96,9 +107,10 @@ No internet for pip? `python devserver.py` runs the same app with the standard l
 
 **Enable Gemini (optional):** get a free key at <https://aistudio.google.com/apikey>, copy `backend/.env.example` to `backend/.env`, paste the key, restart. The top-bar pill then shows `Gemini`.
 
-### Tests
+### Tests and audit
 ```bash
-cd backend && python -m pytest -q      # 11 tests
+cd backend && python -m pytest -q        # 36 tests
+cd backend && python security_audit.py   # 25-point security & code-quality audit
 ```
 `test_parity.py` runs the **same scenarios through both engines** (Python and JavaScript) and fails if any decision — scores, statuses, roadmap, company fit, even the mentor's wording — differs.
 
@@ -127,6 +139,9 @@ frontend/                 the web version (also served by the backend)
   js/arena.js js/world.js game modules
   js/explainer.js         animated explainer video
   js/cursor.js js/fx.js   cursor styles, motion toolkit
+  js/privacy.js           Data Consent + Data Privacy tabs and the consent gate
+  js/theme.js             light/dark, colour per page, text size, contrast, minimal mode
+  js/voice.js js/avatars.js  voice agent and the 3D agent dolls
   js/knowledge.js         generated from the Python knowledge base
   vendor/three.module.min.js  Three.js r170 (MIT)
 backend/
@@ -139,14 +154,20 @@ backend/
     agents.py graph.py    the 8 agents + LangGraph wiring
     llm.py                Gemini (google-genai) with graceful fallback
     service.py routes.py store.py
-  tests/                  test_engine.py · test_parity.py
+    institutions.py       231 Tamil Nadu universities & colleges
+    auth.py security.py   accounts, roles, sessions, hashing, rate limits, sanitising
+  tests/                  test_engine.py · test_parity.py · test_security.py
+  security_audit.py       25 checks: secrets, auth, XSS, CSRF, privacy, lint
 .github/workflows/pages.yml  deploys frontend/ to GitHub Pages
 ```
 
 ## API
+`GET|POST /api/auth/signup|login|logout|demo` · `GET /api/auth/me` · `GET|POST /api/privacy/consent` · `GET /api/privacy/export` · `POST /api/privacy/delete` · `GET /api/directory|institutions|faculty|leaderboard|messages` · `POST /api/faculty/{id}/ask` · `POST /api/messages/{id}/reply` · `POST /api/contact`
 `GET /api/health` · `GET /api/meta` · `GET|POST /api/learners` · `GET /api/learners/{id}` · `POST /api/learners/{id}/assess` · `POST /api/learners/{id}/pivot` · `POST /api/learners/{id}/progress` · `POST /api/learners/{id}/chat` · `POST /api/resume/extract` · `GET /api/quiz?skill=` · `POST /api/quiz/check` · `GET /api/cohort` · `POST /api/demo/reset`
 
 ## Notes & credits
+- The Tamil Nadu institution list (231 universities and colleges) comes from Wikipedia's *List of institutions of higher education in Tamil Nadu*; it is a **starter catalogue**, not the full register of ~2,000 affiliated colleges. Learners whose college is missing can type it in, and more can be appended to `backend/skillforge/institutions.py`.
+- Demo faculty accounts have **no shared password** — the portal demo uses a passwordless session that only ever opens the fictional sample learners, and it is disabled when `SKILLFORGE_PUBLIC=1`.
 - Company information is **indicative** — roles these employers commonly hire for and skills such roles usually emphasise. Always confirm on the official careers page.
 - Learning resources link to free, official sources (MDN, official docs, freeCodeCamp, Khan Academy, NPTEL, Microsoft Learn, Google, Kaggle and similar).
 - [Three.js](https://threejs.org/) r170 (MIT) is vendored in `frontend/vendor/`.
