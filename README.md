@@ -64,6 +64,11 @@ Every agent writes to a shared trace, shown in the **Agent collaboration** panel
 
 ---
 
+## Run it in your browser (no install)
+[![Open in GitHub Codespaces](https://github.com/codespaces/badge.svg)](https://codespaces.new/G-Jayakiruthika/skillforge-ai?quickstart=1)
+
+Click the badge → **Create codespace**. It installs everything and opens the app in a new tab (first start takes ~2 minutes). Stop the codespace when you're done to save free hours.
+
 ## Run it locally
 
 ### Windows (easiest)
