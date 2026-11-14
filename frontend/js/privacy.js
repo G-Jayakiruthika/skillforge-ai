@@ -75,7 +75,7 @@ export function consentBanner(c) {
       Analytics, marketing and<span class="cb-full"> sending text to</span> an outside AI stay <b>off</b> until you turn them on.
       <a href="privacy.html">Read what we collect</a>.</div>
     <div class="cb-btns"><button class="btn sm" id="cb-all" data-tip="Turn on analytics, marketing and AI processing">Accept all</button>
-      <button class="btn ghost sm" id="cb-ess" data-tip="Keep only what the site needs to work">Reject non-essential</button>
+      <button class="btn ghost sm" id="cb-ess" data-tip="Keep only what the site needs to work"><span class="cb-full">Reject non-essential</span><span class="cb-short">Essentials only</span></button>
       <a class="btn ghost sm" href="consent.html" data-tip="Choose each one separately">Choose…</a></div>`;
   document.body.appendChild(bar);
   const close = () => bar.remove();
