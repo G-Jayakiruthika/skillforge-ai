@@ -268,9 +268,11 @@ body.hc .switch .track { border: 2px solid currentColor; }
   .icon-btn { width: 32px; height: 32px; font-size: 14px; }
 }
 @media (max-width: 620px) {
-  .cursor-picker, .xp-chip, .logo-text { display: none; }
-  .top-links a:not(.btn-launch) { display: none; }
-  .btn-launch { padding: 7px 12px; }
+  .cursor-picker, .xp-chip, .logo-text, .top-links { display: none; }
+  .topbar { gap: 8px; padding: 9px 12px; min-height: 56px; }
+  .top-tools { gap: 7px; margin-left: auto; }
+  #user-slot { gap: 6px; }
+  #user-slot .btn.sm { padding: 6px 11px; font-size: 12px; }
 }
 
 /* ---------- consent bar: a slim strip, never a wall over the page ---------- */
