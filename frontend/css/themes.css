@@ -288,3 +288,27 @@ body.hc .switch .track { border: 2px solid currentColor; }
   .cb-btns { width: 100%; gap: 6px; flex-wrap: nowrap; }
   .cb-btns .btn { flex: 1 1 0; justify-content: center; padding: 7px 6px; font-size: 11.5px; white-space: nowrap; }
 }
+
+/* ---------- motion: the 3D dolls glow and breathe, the app background drifts ---------- */
+.doll { border-radius: 50%; filter: drop-shadow(0 0 16px var(--ac, var(--accent))) drop-shadow(0 8px 24px rgba(0, 0, 0, .55)); animation: dollFloat 6s ease-in-out infinite; }
+.guide-strip .doll, .doll-card .doll { animation-duration: 7s; }
+@keyframes dollFloat { 0%, 100% { transform: translateY(0) } 50% { transform: translateY(-6px) } }
+
+/* the halo the mentor used to have, now sitting behind its 3D doll */
+.orb-halo { position: relative; display: grid; place-items: center; flex: none; }
+.orb-halo::before { content: ""; position: absolute; inset: -4%; border-radius: 50%; z-index: 0;
+  background: radial-gradient(circle at 32% 28%, rgba(255, 255, 255, .5), var(--accent) 36%, var(--accent2) 70%, transparent 76%);
+  filter: blur(3px); opacity: .45; animation: orbBreathe 5.5s ease-in-out infinite; }
+.orb-halo::after { content: ""; position: absolute; inset: -16%; border-radius: 50%; z-index: 0;
+  border: 1px dashed var(--accent); opacity: .45; animation: spin 14s linear infinite; }
+.orb-halo > * { position: relative; z-index: 1; }
+.orb-halo.talking::before { animation: orbBreathe 5.5s ease-in-out infinite, talk .45s ease-in-out infinite alternate; }
+@keyframes orbBreathe { 0%, 100% { transform: scale(1); opacity: .4 } 50% { transform: scale(1.07); opacity: .72 } }
+
+/* the accent wash behind the app pages drifts instead of sitting still */
+body.in-app::before { animation: aurora 26s ease-in-out infinite alternate; }
+@keyframes aurora {
+  0%   { transform: translate3d(0, 0, 0) scale(1); opacity: .85; }
+  50%  { transform: translate3d(-3%, 2%, 0) scale(1.12); opacity: 1; }
+  100% { transform: translate3d(3%, -2%, 0) scale(1.06); opacity: .9; }
+}

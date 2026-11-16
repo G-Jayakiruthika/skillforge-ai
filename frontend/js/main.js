@@ -345,6 +345,24 @@ function renderPage() {
 function animate(root) {
   root.querySelectorAll("[data-count]").forEach((x) => countUp(x, +x.dataset.count, 1100, x.dataset.suffix || ""));
   requestAnimationFrame(() => root.querySelectorAll(".meter > span[data-w]").forEach((m) => (m.style.width = m.dataset.w + "%")));
+  addMotion(root);
+}
+/* Every page gets the entrance motion the landing page has: cards rise and stagger
+   in as they scroll into view, and lift under the pointer. Tagging happens here so
+   page templates stay plain HTML. Skipped entirely when the person has chosen
+   reduced motion or the minimalist style in Settings. */
+function addMotion(root) {
+  if (reduced || theme.motionOff() || theme.isMinimal()) return;
+  const cards = root.querySelectorAll(".card, .glass, .tile, .page-head, article");
+  cards.forEach((c) => {
+    if (c.closest("#gmodal") || c.classList.contains("reveal")) return;
+    c.classList.add("reveal");
+    if (!c.classList.contains("tilt") && !c.querySelector("canvas")) c.classList.add("tilt");
+  });
+  observeReveals(root);
+  // A card the observer never sees (short page, background tab, inner scroller)
+  // must not stay invisible, so anything still hidden is shown shortly after.
+  setTimeout(() => root.querySelectorAll(".reveal:not(.revealed)").forEach((el) => el.classList.add("revealed")), 1500);
 }
 /* Forms rendered inside the modal overlay do not trigger implicit submission in every browser,
    so wire the submit button's click as well as the form's submit event. */
@@ -393,7 +411,7 @@ function pDashboard(el) {
     <div class="card stat"><div class="label">${d ? "Dream company" : "Job-ready in"}</div>${d ? `<div class="value sm">${esc(d.company)}</div><div class="small">${d.readiness}% ready as ${esc(d.role)}</div>` : `<div class="value"><span data-count="${rm.eta_weeks || 0}">0</span><span class="muted" style="font-size:18px"> weeks</span></div>`}</div>
   </div>
   <div class="grid g2" style="margin-top:16px">
-    <div class="card"><div class="mentor"><div id="mentor-orb" data-tip="${esc(DOLLS.mentor.name)}, your mentor agent">${dollHtml("mentor", 72, 'data-mood="talk"')}</div><div>
+    <div class="card"><div class="mentor"><div id="mentor-orb" class="orb-halo" data-tip="${esc(DOLLS.mentor.name)}, your mentor agent">${dollHtml("mentor", 72, 'data-mood="talk"')}</div><div>
       <h3>AI Mentor <span class="small muted">· ${esc(DOLLS.mentor.name)}</span> <span class="badge brand">${esc(mentor.source || "")}</span></h3><div class="mentor-msg" id="mentor-msg" aria-live="polite"></div>
       <ol class="next-list">${(mentor.next_actions || []).map((a, i) => `<li><b>0${i + 1}</b>${esc(a)}</li>`).join("")}</ol>
       <div class="row" style="margin-top:14px">${rm.active ? `<button class="btn primary sm" data-assess="${esc(rm.active)}" data-cursor="Test">Assess ${esc(rm.active)}</button><a class="btn ghost sm" href="arena.html">🎮 Arena</a>` : ""}<a class="btn ghost sm" href="world.html">🗺 Where am I?</a></div>
@@ -404,7 +422,9 @@ function pDashboard(el) {
   <div class="portal-grid">${FEATURES6.map(([id, num, title, desc, col]) => `<a class="glass tilt feature-card portal-card" href="${id}.html" style="--ac:${col}" data-cursor="Enter"><span class="num">FEATURE ${num}</span><h3>${title}</h3><p>${desc}</p><span class="enter">Enter →</span><button class="newtab" data-href="${id}.html" title="Open in a new page">↗</button></a>`).join("")}</div>
   <div class="card" style="margin-top:16px"><h3>🏅 Achievements</h3>${achHtml(L)}</div>`;
   radar($("#radar"), m.skills || []);
-  const md = mountAll($("#mentor-orb")).mentor; typewrite($("#mentor-msg"), mentor.message || "", 12, () => md?.set("idle"));
+  const md = mountAll($("#mentor-orb")).mentor, halo = $("#mentor-orb");
+  halo?.classList.add("talking");
+  typewrite($("#mentor-msg"), mentor.message || "", 12, () => { md?.set("idle"); halo?.classList.remove("talking"); });
 }
 function radar(host, rows) {
   if (!rows.length) return;
