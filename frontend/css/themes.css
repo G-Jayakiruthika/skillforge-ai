@@ -312,3 +312,12 @@ body.in-app::before { animation: aurora 26s ease-in-out infinite alternate; }
   50%  { transform: translate3d(-3%, 2%, 0) scale(1.12); opacity: 1; }
   100% { transform: translate3d(3%, -2%, 0) scale(1.06); opacity: .9; }
 }
+
+/* ---------- when a setting is hiding the visuals, say so ---------- */
+.icon-btn.flagged { position: relative; border-color: var(--amber, #fbbf24); }
+.icon-btn.flagged::after { content: ""; position: absolute; top: -2px; right: -2px; width: 9px; height: 9px; border-radius: 50%;
+  background: var(--amber, #fbbf24); box-shadow: 0 0 8px var(--amber, #fbbf24); }
+.set-warn { display: grid; gap: 10px; justify-items: start; margin: 4px 0 14px; padding: 12px 14px; border-radius: 12px;
+  border: 1px solid var(--amber, #fbbf24); background: rgba(251, 191, 36, .1); font-size: calc(13px * var(--text-scale)); line-height: 1.5; }
+.set-warn .btn.sm { padding: 7px 14px; }
+body.hc .set-warn { border-width: 2px; }

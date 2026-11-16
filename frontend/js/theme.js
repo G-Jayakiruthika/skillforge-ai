@@ -38,6 +38,16 @@ export function accentPair() {
   return S.accent === "page" ? PAGE_COLORS[page] || PAGE_COLORS.app : ACCENTS[S.accent] || PAGE_COLORS.app;
 }
 export const isLight = () => S.mode === "light" || (S.mode === "auto" && matchMedia("(prefers-color-scheme: light)").matches);
+/* Which of the accessibility settings are currently hiding the 3D background and the
+   animations. People turn one of these on, forget, and think the site is broken, so the
+   gear button and the settings panel both say it plainly. */
+export function visualsOff() {
+  const why = [];
+  if (S.contrast === "high") why.push("High contrast");
+  if (S.style === "minimal") why.push("Minimal style");
+  if (S.motion === "reduced") why.push("Reduce motion");
+  return why;
+}
 export const isMinimal = () => S.style === "minimal";
 export const motionOff = () => S.motion === "reduced" || matchMedia("(prefers-reduced-motion: reduce)").matches;
 
@@ -53,6 +63,13 @@ export function apply() {
   root.style.colorScheme = light ? "light" : "dark";
   document.querySelector('meta[name="theme-color"]')?.setAttribute("content", light ? "#f6f7fb" : "#05060f");
   const btn = document.getElementById("btn-mode"); if (btn) { btn.textContent = light ? "🌙" : "☀️"; btn.dataset.tip = light ? "Switch to dark mode" : "Switch to bright mode"; }
+  const gear = document.getElementById("btn-settings"), off = visualsOff();
+  if (gear) {
+    gear.classList.toggle("flagged", off.length > 0);
+    gear.dataset.tip = off.length
+      ? off.join(" + ") + " is on, so the 3D background and animations are hidden - click to change it"
+      : "Colours, text size, contrast, minimalist style and more";
+  }
 }
 
 /* Fonts are added from script (not an inline onload attribute) so the strict CSP holds. */
@@ -65,7 +82,11 @@ function loadFonts() {
 /* ---------------- settings panel ---------------- */
 const seg = (key, opts) => `<div class="set-seg" role="radiogroup" data-key="${key}">${opts.map(([v, label, tip]) => `<button role="radio" aria-checked="${S[key] === v}" class="${S[key] === v ? "on" : ""}" data-v="${v}" data-tip="${tip || ""}">${label}</button>`).join("")}</div>`;
 function panelHtml() {
-  return `<div class="set-head"><h3>Display &amp; accessibility</h3><button class="icon-btn" id="set-close" aria-label="Close settings">✕</button></div>
+  const off = visualsOff();
+  const banner = off.length
+    ? `<div class="set-warn"><b>${off.join(" + ")} is on.</b> The 3D background and the animations are hidden while it is.<button class="btn sm" id="set-restore">Restore the full look</button></div>`
+    : "";
+  return `<div class="set-head"><h3>Display &amp; accessibility</h3><button class="icon-btn" id="set-close" aria-label="Close settings">✕</button></div>${banner}
   <label class="lbl">Brightness</label>${seg("mode", [["dark", "🌙 Dark", "Dark background, easier in low light"], ["light", "☀️ Bright", "Light background, easier in daylight"], ["auto", "Auto", "Follow your device setting"]])}
   <label class="lbl">Style</label>${seg("style", [["immersive", "✨ Immersive", "3D background, animations and effects"], ["minimal", "▢ Minimal", "Calm, flat design with no effects"]])}
   <label class="lbl">Colour</label><div class="swatches" data-key="accent"><button class="sw rainbow ${S.accent === "page" ? "on" : ""}" data-v="page" data-tip="A different colour on every page" aria-label="Different colour per page"></button>${Object.entries(ACCENTS).map(([n, [c1, c2]]) => `<button class="sw ${S.accent === n ? "on" : ""}" data-v="${n}" style="background:linear-gradient(135deg,${c1},${c2})" data-tip="${n} everywhere" aria-label="${n} colour"></button>`).join("")}</div>
@@ -82,6 +103,8 @@ function openPanel() {
   p.innerHTML = panelHtml(); p.hidden = false;
   p.querySelector("#set-close").onclick = () => (p.hidden = true);
   p.querySelector("#set-reset").onclick = () => { reset(); openPanel(); };
+  const restore = p.querySelector("#set-restore");
+  if (restore) restore.onclick = () => { S.contrast = "normal"; S.style = "immersive"; S.motion = "full"; save(); apply(); listeners.forEach((f) => f(S)); openPanel(); };
   p.querySelectorAll("[data-key] [data-v]").forEach((b) => (b.onclick = () => { set(b.parentElement.dataset.key, b.dataset.v); openPanel(); }));
   p.querySelector("button")?.focus();
 }
