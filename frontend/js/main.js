@@ -379,6 +379,31 @@ function pageCtx() {
     go: (href, label) => portalTo(href, innerWidth / 2, innerHeight / 2, label), speak: (t) => S.voice?.say(t),
     closeModal: () => ($("#gmodal").hidden = true), track: PV.track, onSubmit };
 }
+/* ?diag=1 prints what this browser is actually doing with the page - saved display
+   settings, body classes, whether WebGL is available, which build loaded. It is the
+   one screenshot that answers "the animations are not showing" without DevTools. */
+function showDiagnostics() {
+  let webgl = "no";
+  try { const c = document.createElement("canvas"); webgl = (c.getContext("webgl2") && "webgl2") || (c.getContext("webgl") && "webgl") || "no"; } catch (_) { webgl = "blocked"; }
+  let saved = "none";
+  try { saved = localStorage.getItem("sf-settings") || "none"; } catch (_) { saved = "localStorage blocked"; }
+  const rows = [
+    ["Build", (document.querySelector("script[src*='main.js']")?.getAttribute("src") || "?").split("v=")[1] || "unstamped"],
+    ["Saved settings", saved],
+    ["Body classes", document.body.className || "(none)"],
+    ["WebGL", webgl],
+    ["3D canvas", getComputedStyle(document.getElementById("gl") || document.body).display],
+    ["Animations running", String(document.getAnimations().length)],
+    ["Stylesheets", [...document.styleSheets].filter((s) => (s.href || "").includes("skillforge")).length + " of 2"],
+    ["Reduced motion asked by OS", String(matchMedia("(prefers-reduced-motion: reduce)").matches)],
+  ];
+  const box = document.createElement("div");
+  box.id = "diag-box";
+  box.innerHTML = `<b>SkillForge diagnostics</b><table>${rows.map(([k, v]) => `<tr><td>${esc(k)}</td><td>${esc(v)}</td></tr>`).join("")}</table>
+    <a class="btn ghost sm" href="?reset=look">Reset the look</a>`;
+  document.body.appendChild(box);
+}
+
 function renderUser() {
   const slot = $("#user-slot"); if (!slot) return; const u = S.user;
   slot.innerHTML = u ? `<a class="user-chip" href="account.html" data-tip="Your account — ${esc(u.role)}${u.institution ? " at " + esc(u.institution) : ""}"><span class="ua">${esc((u.name || "?")[0].toUpperCase())}</span>${esc(u.name.split(" ")[0])} <small>${esc(u.role)}</small></a>`
@@ -885,6 +910,7 @@ async function boot() {
     if (PAGE === "home") { observeReveals(); $$(".hero [data-scramble]").forEach((el, i) => setTimeout(() => scramble(el, undefined, 1100), 200 + i * 250)); if (location.hash) document.getElementById(location.hash.slice(1))?.scrollIntoView(); }
   }, 300);
 
+  if (new URLSearchParams(location.search).has("diag")) showDiagnostics();
   S.voice = initVoice({ getLearner: () => S.learner, toast, go: (href, label) => portalTo(href, 40, innerHeight - 40, label),
     ask: async (q) => (await api(`api/learners/${S.learner.id}/chat`, { question: q })).answer });
   $("#gmodal-close").onclick = () => ($("#gmodal").hidden = true);

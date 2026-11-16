@@ -321,3 +321,10 @@ body.in-app::before { animation: aurora 26s ease-in-out infinite alternate; }
   border: 1px solid var(--amber, #fbbf24); background: rgba(251, 191, 36, .1); font-size: calc(13px * var(--text-scale)); line-height: 1.5; }
 .set-warn .btn.sm { padding: 7px 14px; }
 body.hc .set-warn { border-width: 2px; }
+
+/* ---------- ?diag=1 panel ---------- */
+#diag-box { position: fixed; left: 14px; top: 80px; z-index: 120; max-width: min(520px, 92vw); padding: 14px 16px; border-radius: 14px;
+  border: 1px solid var(--accent); background: #05060f; color: #eef1ff; font: 12px/1.5 var(--mono); box-shadow: 0 20px 60px -20px #000; }
+#diag-box table { border-collapse: collapse; margin: 10px 0; width: 100%; }
+#diag-box td { padding: 3px 8px 3px 0; vertical-align: top; word-break: break-all; border-top: 1px solid rgba(255, 255, 255, .12); }
+#diag-box td:first-child { color: var(--accent); white-space: nowrap; }

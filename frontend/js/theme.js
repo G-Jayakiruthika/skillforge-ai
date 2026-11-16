@@ -26,7 +26,18 @@ let S = { ...DEFAULTS }, listeners = [];
 
 export const settings = () => ({ ...S });
 export function onChange(fn) { listeners.push(fn); }
-function load() { try { S = { ...DEFAULTS, ...JSON.parse(localStorage.getItem(KEY) || "{}") }; } catch (_) { S = { ...DEFAULTS }; } }
+/* ?reset=look throws away the saved display settings and brings back the full
+   3D look. It exists so a link can rescue anyone whose browser is stuck on an
+   accessibility setting they cannot find, with no need to open the panel. */
+function load() {
+  try { S = { ...DEFAULTS, ...JSON.parse(localStorage.getItem(KEY) || "{}") }; } catch (_) { S = { ...DEFAULTS }; }
+  try {
+    if (new URLSearchParams(location.search).get("reset") === "look") {
+      S = { ...DEFAULTS };
+      localStorage.removeItem(KEY);
+    }
+  } catch (_) {}
+}
 function save() { try { localStorage.setItem(KEY, JSON.stringify(S)); } catch (_) {} }
 export function set(key, value) { S[key] = value; save(); apply(); listeners.forEach((f) => f(S)); }
 export function reset() { S = { ...DEFAULTS }; save(); apply(); listeners.forEach((f) => f(S)); }
