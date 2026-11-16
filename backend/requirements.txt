@@ -21,4 +21,4 @@ langgraph>=0.2,<1.0
 
 # Google Gemini. Optional: only used when GEMINI_API_KEY is set AND the user
 # has turned on AI processing consent. Without it every agent still runs.
-google-genai>=1.0,<2.0
+google-genai>=3.3.0,<4.0
