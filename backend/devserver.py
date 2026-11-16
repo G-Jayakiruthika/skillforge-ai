@@ -23,8 +23,8 @@ from skillforge.security import Env  # noqa: E402
 
 FRONTEND = Path(__file__).resolve().parent.parent / "frontend"
 BLOCKED = {".env", ".git", ".secret", "data", "__pycache__", ".venv", "node_modules"}
-ALLOWED_SUFFIX = {".html", ".css", ".js", ".mjs", ".json", ".svg", ".png", ".jpg", ".webp",
-                  ".ico", ".woff2", ".txt", ".webm"}
+ALLOWED_SUFFIX = {".html", ".css", ".js", ".mjs", ".json", ".webmanifest", ".svg", ".png", ".jpg",
+                  ".webp", ".ico", ".woff2", ".txt", ".xml", ".webm"}
 MAX_BODY = 256_000
 
 
@@ -98,12 +98,13 @@ class Handler(BaseHTTPRequestHandler):
         if rel.endswith("/"):
             rel += "index.html"
         f = (FRONTEND / rel).resolve()
-        if FRONTEND.resolve() not in f.parents or not f.is_file():
-            f = FRONTEND / "index.html"
+        missing = FRONTEND.resolve() not in f.parents or not f.is_file()
+        if missing:
+            f = FRONTEND / "404.html"          # the real 404 page, with a 404 status
         if f.suffix.lower() not in ALLOWED_SUFFIX:
             return self._send(404, {"detail": "Not found"})
-        self._send(200, f.read_bytes(), mimetypes.guess_type(f.name)[0] or "application/octet-stream",
-                   path=url.path)
+        self._send(404 if missing else 200, f.read_bytes(),
+                   mimetypes.guess_type(f.name)[0] or "application/octet-stream", path=url.path)
 
     def do_GET(self) -> None:  # noqa: N802
         self._handle("GET")

@@ -1,0 +1,14 @@
+# SkillForge AI
+User-agent: *
+Allow: /
+
+# Signed-in areas hold personal data and have nothing useful to index.
+Disallow: /account.html
+Disallow: /portal.html
+Disallow: /consent.html
+Disallow: /login.html
+Disallow: /signup.html
+Disallow: /*?diag=
+Disallow: /*?reset=
+
+Sitemap: https://g-jayakiruthika.github.io/skillforge-ai/sitemap.xml

@@ -24,6 +24,9 @@ from skillforge.security import Env
 
 FRONTEND = Path(__file__).resolve().parent.parent / "frontend"
 BLOCKED = {".env", ".git", ".secret", "data", "__pycache__", ".venv", "node_modules"}
+# File types the frontend may serve. Anything else is refused, whatever the URL.
+ALLOWED_SUFFIX = {".html", ".css", ".js", ".mjs", ".json", ".webmanifest", ".svg", ".png",
+                  ".jpg", ".webp", ".ico", ".woff2", ".txt", ".xml", ".webm"}
 
 app = FastAPI(
     title="SkillForge AI", version="4.0.0",
@@ -103,12 +106,15 @@ def frontend(full_path: str) -> Response:
     if rel.endswith("/"):
         rel += "index.html"
     target = (FRONTEND / rel).resolve()
-    if FRONTEND.resolve() not in target.parents or not target.is_file():
-        target = FRONTEND / "index.html"
-    if target.suffix.lower() not in {".html", ".css", ".js", ".mjs", ".json", ".svg", ".png", ".jpg",
-                                     ".webp", ".ico", ".woff2", ".txt", ".webm"}:
+    missing = FRONTEND.resolve() not in target.parents or not target.is_file()
+    if missing:
+        # A wrong address gets the real 404 page and a 404 status, so browsers,
+        # crawlers and link checkers are told the truth instead of being handed
+        # the landing page with a 200.
+        target = FRONTEND / "404.html"
+    if target.suffix.lower() not in ALLOWED_SUFFIX:
         return JSONResponse({"detail": "Not found"}, status_code=404)
-    return FileResponse(target)
+    return FileResponse(target, status_code=404 if missing else 200)
 
 
 if __name__ == "__main__":

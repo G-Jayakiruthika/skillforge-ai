@@ -1,0 +1,14 @@
+.git
+.github
+.devcontainer
+**/__pycache__
+**/*.pyc
+**/.pytest_cache
+.venv
+venv
+backend/data
+backend/.env
+.env
+docs
+*.md
+!backend/requirements.txt

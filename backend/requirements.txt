@@ -1,9 +1,24 @@
-fastapi>=0.115
-uvicorn[standard]>=0.30
-pydantic>=2.7
-# Agent orchestration (optional - a built-in state machine is used if missing)
-langgraph>=0.2
-# Google Gemini (optional - only used when GEMINI_API_KEY is set)
-google-genai>=1.0
-# Tests
-pytest>=8
+# Runtime dependencies.
+#
+# Upper bounds stop a future major release from breaking a deploy silently.
+# For a reproducible production install, freeze a lock file on the machine you
+# deploy from and install from that instead:
+#
+#     pip install -r requirements.txt
+#     pip freeze > requirements.lock.txt
+#     pip install -r requirements.lock.txt   # on the server
+#
+# Nothing here is required to run the browser-only web version, and the
+# zero-install server (devserver.py) needs only the Python standard library.
+
+fastapi>=0.115,<1.0
+uvicorn[standard]>=0.30,<1.0
+pydantic>=2.7,<3.0
+
+# Agent orchestration. Optional: skillforge/graph.py falls back to a built-in
+# state machine that produces identical results when this is missing.
+langgraph>=0.2,<1.0
+
+# Google Gemini. Optional: only used when GEMINI_API_KEY is set AND the user
+# has turned on AI processing consent. Without it every agent still runs.
+google-genai>=1.0,<2.0

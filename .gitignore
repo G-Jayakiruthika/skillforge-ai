@@ -7,3 +7,18 @@ backend/.env
 backend/data/
 .pytest_cache/
 .DS_Store
+
+# Lock file generated on the deploy machine
+backend/requirements.lock.txt
+# Node (only used for syntax checks and parity test runner)
+node_modules/
+# Editors
+.idea/
+.vscode/
+*.swp
+# Build and coverage output
+dist/
+build/
+htmlcov/
+.coverage
+coverage.xml
