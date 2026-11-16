@@ -234,6 +234,12 @@ export async function pPrivacy(el, c) {
       ${u && u.demo ? `<p class="small muted" style="margin-top:8px">The shared demo account cannot be deleted.</p>` : ""}
       <div id="pv-del-msg" aria-live="polite"></div></div>
   </div>
+
+  <div class="card" style="margin-top:16px"><h3>📄 The full documents</h3>
+    <p class="small muted">This page is the plain-English summary. The complete Privacy Policy and the Terms of Service set out the legal detail — who the operator is, how long each kind of data is kept, and how to raise a complaint.</p>
+    <p class="row" style="gap:10px;flex-wrap:wrap;margin-top:10px">
+      <a class="btn ghost sm" href="terms.html" data-tip="What you agree to when you use SkillForge AI">Terms of Service</a>
+    </p></div>
   <p class="small muted" style="margin-top:14px">ⓘ This is a student project, not legal advice. It follows GDPR and India's DPDP Act 2023 principles: purpose limitation, data minimisation, consent, and the right to access and erase.</p>`;
 
   const ex = el.querySelector("#pv-export");

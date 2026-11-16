@@ -6,7 +6,7 @@
 **Live web version: https://g-jayakiruthika.github.io/skillforge-ai/**
 The same 8 agents run inside your browser, so judges can open the link and use everything immediately. Data stays on their device.
 
-![agents](https://img.shields.io/badge/agents-8-4f46e5) ![industries](https://img.shields.io/badge/industries-9-ff3ea5) ![roles](https://img.shields.io/badge/roles-14-ffb547) ![companies](https://img.shields.io/badge/employers-30-9dff6a) ![stack](https://img.shields.io/badge/backend-FastAPI%20%2B%20LangGraph-009688) ![tests](https://img.shields.io/badge/tests-11%20passing-success)
+![agents](https://img.shields.io/badge/agents-8-4f46e5) ![industries](https://img.shields.io/badge/industries-9-ff3ea5) ![roles](https://img.shields.io/badge/roles-14-ffb547) ![companies](https://img.shields.io/badge/employers-30-9dff6a) ![stack](https://img.shields.io/badge/backend-FastAPI%20%2B%20LangGraph-009688) ![tests](https://img.shields.io/badge/tests-36%20passing-success) ![audit](https://img.shields.io/badge/security%20audit-25%2F25-success) [![CI](https://github.com/G-Jayakiruthika/skillforge-ai/actions/workflows/ci.yml/badge.svg)](https://github.com/G-Jayakiruthika/skillforge-ai/actions/workflows/ci.yml) ![licence](https://img.shields.io/badge/licence-proprietary-lightgrey)
 
 | Landing (WebGL) | Dashboard | Career + company matching |
 |---|---|---|
@@ -173,5 +173,49 @@ backend/
 - [Three.js](https://threejs.org/) r170 (MIT) is vendored in `frontend/vendor/`.
 - Fonts: Space Grotesk & JetBrains Mono via Google Fonts.
 
+## Deploying it
+
+| | What | Host |
+|---|---|---|
+| Web version | `frontend/` only, agents run in the browser | Already live on GitHub Pages, redeployed on every push |
+| Full version | `backend/` + `frontend/`, with accounts and the database | Docker, Render, Railway, Fly.io or your own server |
+
+```bash
+docker compose up --build        # http://localhost:8000
+```
+
+**[docs/DEPLOYMENT.md](docs/DEPLOYMENT.md)** has the step-by-step for each host,
+the environment variables that matter in production, HTTPS behind Nginx,
+backups, and the SQLite → Postgres migration.
+
+**Read [docs/LAUNCH-CHECKLIST.md](docs/LAUNCH-CHECKLIST.md) before opening public
+sign-up.** It lists what only the operator can do — the under-18 decision under
+India's DPDP Act, legal review, a persistent database, and password reset — and
+what is already finished.
+
+## Licence and legal
+
+The code is **proprietary** — published for viewing and evaluation, not open
+source. See [LICENSE](LICENSE) and [THIRD-PARTY-NOTICES.md](THIRD-PARTY-NOTICES.md).
+
+- Security disclosure: [SECURITY.md](SECURITY.md)
+- Terms of Service draft: [legal/TERMS-OF-SERVICE.md](legal/TERMS-OF-SERVICE.md) → published at `frontend/terms.html`
+- Privacy Policy draft: [legal/PRIVACY-POLICY.md](legal/PRIVACY-POLICY.md) → summarised in-app at `frontend/privacy.html`
+
+Both legal documents are drafts marked for review. They are not in force until a
+qualified lawyer has checked them and every placeholder is filled.
+
+## Contributing and changes
+
+[CONTRIBUTING.md](CONTRIBUTING.md) · [CHANGELOG.md](CHANGELOG.md)
+
+CI runs the 36 tests on Python 3.11 and 3.12, the 25-check security audit, a
+JavaScript parse check, and a check that `frontend/js/knowledge.js` is in sync
+with its Python source, on every push and pull request.
+
 ## Future work
-Authentication and roles (learner / trainer / admin), PostgreSQL, live job-posting analysis to keep role benchmarks and company data current, spaced-repetition review, LMS integration, more roles from the full ESCO/O*NET taxonomy.
+
+Email verification and password reset, PostgreSQL, real-time multiplayer for
+compete mode, live job-posting analysis to keep role benchmarks and company data
+current, spaced-repetition review, LMS integration, institutions beyond Tamil
+Nadu, Tamil language support, and more roles from the full ESCO/O*NET taxonomy.
