@@ -1,0 +1,42 @@
+# Render blueprint. New → Blueprint → connect this repository, and Render reads
+# this file: the service, the persistent disk and the health check are already
+# set up. Fill in the secrets marked sync:false in the dashboard afterwards.
+services:
+  - type: web
+    name: skillforge-ai
+    runtime: docker
+    plan: starter            # free tier sleeps after inactivity; starter does not
+    healthCheckPath: /api/health
+    disk:
+      # Without this disk the database lives on an ephemeral filesystem and every
+      # account is deleted on the next deploy.
+      name: skillforge-data
+      mountPath: /data
+      sizeGB: 1
+    envVars:
+      - key: SKILLFORGE_PUBLIC
+        value: "1"
+      - key: SKILLFORGE_DB
+        value: /data/skillforge.db
+      - key: SKILLFORGE_SECRET
+        generateValue: true          # generated once, then kept across deploys
+      - key: SKILLFORGE_SESSION_HOURS
+        value: "72"
+      - key: SKILLFORGE_CORS_ORIGINS
+        sync: false                  # set to your real origin, e.g. https://skillforge.example.com
+      - key: SKILLFORGE_BASE_URL
+        sync: false                  # same origin; used to build reset links
+      - key: SKILLFORGE_ADMIN_EMAIL
+        sync: false
+      - key: SKILLFORGE_SMTP_HOST
+        sync: false
+      - key: SKILLFORGE_SMTP_PORT
+        value: "587"
+      - key: SKILLFORGE_SMTP_USER
+        sync: false
+      - key: SKILLFORGE_SMTP_PASSWORD
+        sync: false
+      - key: SKILLFORGE_MAIL_FROM
+        sync: false
+      - key: GEMINI_API_KEY
+        sync: false                  # optional; only used with AI-processing consent

@@ -27,7 +27,7 @@ def call(method, path, body=None, user=None, token=None, query=None, ip="1.2.3.4
 
 
 def new_user(email="stu@example.com", role="student", inst="loyola-college", pw="Str0ng-Pass9"):
-    st, out, ctx = call("POST", "/api/auth/signup", {"name": "Test Person", "email": email, "password": pw,
+    st, out, ctx = call("POST", "/api/auth/signup", {"age_confirmed": True, "terms_accepted": True, "name": "Test Person", "email": email, "password": pw,
                                                      "confirm": pw, "role": role, "institution_id": inst})
     assert st == 200, out
     return out["user"], ctx.set_cookie
@@ -43,14 +43,14 @@ def test_password_never_stored_or_returned():
 
 def test_weak_and_duplicate_signups_rejected():
     for pw in ("short1", "password", "allletters", "12345678"):
-        st, out, _ = call("POST", "/api/auth/signup", {"name": "A B", "email": "x@example.com", "password": pw}, ip="5.5.5.1")
+        st, out, _ = call("POST", "/api/auth/signup", {"age_confirmed": True, "terms_accepted": True, "name": "A B", "email": "x@example.com", "password": pw}, ip="5.5.5.1")
         assert st == 400, pw
     new_user()
-    st, out, _ = call("POST", "/api/auth/signup", {"name": "A B", "email": "STU@example.com", "password": "Str0ng-Pass9"}, ip="5.5.5.2")
+    st, out, _ = call("POST", "/api/auth/signup", {"age_confirmed": True, "terms_accepted": True, "name": "A B", "email": "STU@example.com", "password": "Str0ng-Pass9"}, ip="5.5.5.2")
     assert st == 400 and "already exists" in out["detail"]
-    assert call("POST", "/api/auth/signup", {"name": "A B", "email": "nope", "password": "Str0ng-Pass9"}, ip="5.5.5.2")[0] == 400
+    assert call("POST", "/api/auth/signup", {"age_confirmed": True, "terms_accepted": True, "name": "A B", "email": "nope", "password": "Str0ng-Pass9"}, ip="5.5.5.2")[0] == 400
     # and the limit itself: a sixth signup attempt from one address inside an hour is refused
-    codes = [call("POST", "/api/auth/signup", {"name": "A B", "email": f"u{i}@example.com", "password": "Str0ng-Pass9"}, ip="5.5.5.3")[0]
+    codes = [call("POST", "/api/auth/signup", {"age_confirmed": True, "terms_accepted": True, "name": "A B", "email": f"u{i}@example.com", "password": "Str0ng-Pass9"}, ip="5.5.5.3")[0]
              for i in range(7)]
     assert codes[:5] == [200] * 5 and codes[5] == 429
 
@@ -98,7 +98,7 @@ def test_admin_routes_need_admin():
 
 def test_signup_cannot_grant_admin():
     new_user("owner@example.com")
-    st, out, _ = call("POST", "/api/auth/signup", {"name": "Sneaky One", "email": "s@example.com",
+    st, out, _ = call("POST", "/api/auth/signup", {"age_confirmed": True, "terms_accepted": True, "name": "Sneaky One", "email": "s@example.com",
                                                    "password": "Str0ng-Pass9", "role": "admin"})
     assert st == 200 and out["user"]["role"] == "student"
 
@@ -118,7 +118,7 @@ def test_admin_email_env_and_public_mode(monkeypatch):
 def test_no_shared_demo_password_and_reserved_domain():
     src = (Path(__file__).resolve().parents[1] / "skillforge" / "service.py").read_text()
     assert "DEMO_PASSWORD" not in src
-    st, out, _ = call("POST", "/api/auth/signup", {"name": "Fake Demo", "email": "x@demo.skillforge.test",
+    st, out, _ = call("POST", "/api/auth/signup", {"age_confirmed": True, "terms_accepted": True, "name": "Fake Demo", "email": "x@demo.skillforge.test",
                                                    "password": "Str0ng-Pass9"})
     assert st == 400
     for guess in ("Demo#Faculty1", "password", "demo"):
@@ -375,3 +375,115 @@ def test_demo_account_cannot_be_deleted():
     st, out, ctx = call("POST", "/api/auth/demo", {})
     demo = auth.user_for_token(ctx.set_cookie)
     assert call("POST", "/api/privacy/delete", {"confirm": "DELETE"}, user=demo)[0] == 403
+
+
+# ---------------------------------------------------------------- age gate
+def test_signup_requires_the_age_and_terms_declaration():
+    """Self sign-up is 18+: under India's DPDP Act a child's data needs verifiable
+    parental consent, which this product does not implement."""
+    base = {"name": "Young Person", "email": "young@example.com", "password": "Str0ng-Pass9",
+            "confirm": "Str0ng-Pass9", "institution_id": "loyola-college"}
+
+    st, out, _ = call("POST", "/api/auth/signup", dict(base, terms_accepted=True), ip="7.1.1.1")
+    assert st == 400 and "18 or over" in out["detail"]
+
+    st, out, _ = call("POST", "/api/auth/signup", dict(base, age_confirmed=True), ip="7.1.1.2")
+    assert st == 400 and "Terms of Service" in out["detail"]
+
+    st, out, _ = call("POST", "/api/auth/signup",
+                      dict(base, age_confirmed=True, terms_accepted=True), ip="7.1.1.3")
+    assert st == 200, out
+    # The declaration is recorded as a timestamp and a terms version - never a date of birth.
+    saved = store.get_user(out["user"]["id"])
+    assert saved["age_confirmed"] and saved["terms_accepted"]
+    assert saved["terms_version"] == auth.TERMS_VERSION
+    assert "dob" not in saved and "birth" not in str(saved).lower()
+
+
+# -------------------------------------------------------- password reset
+def test_password_reset_does_not_reveal_who_has_an_account():
+    new_user(email="real@example.com")
+    known = call("POST", "/api/auth/forgot", {"email": "real@example.com"}, ip="7.2.1.1")
+    unknown = call("POST", "/api/auth/forgot", {"email": "nobody@example.com"}, ip="7.2.1.2")
+    assert known[0] == unknown[0] == 200
+    assert known[1] == unknown[1]          # byte-for-byte the same answer
+
+
+def test_password_reset_token_is_single_use_and_changes_the_password():
+    user, _ = new_user(email="forgot@example.com")
+    token = security.make_token()
+    store.create_token(security.token_fingerprint(token), user["id"], "reset", 3600)
+
+    st, out, _ = call("POST", "/api/auth/reset", {"token": token, "password": "Rec0vered-Pass7",
+                                                  "confirm": "Rec0vered-Pass7"})
+    assert st == 200, out
+    assert call("POST", "/api/auth/login", {"email": "forgot@example.com", "password": "Rec0vered-Pass7"})[0] == 200
+    assert call("POST", "/api/auth/login", {"email": "forgot@example.com", "password": "Str0ng-Pass9"})[0] == 401
+
+    # the same link cannot be replayed
+    st, out, _ = call("POST", "/api/auth/reset", {"token": token, "password": "Another-Pass8",
+                                                  "confirm": "Another-Pass8"})
+    assert st == 400 and "already been used" in out["detail"]
+
+
+def test_password_reset_rejects_expired_and_forged_tokens():
+    user, _ = new_user(email="expired@example.com")
+    stale = security.make_token()
+    store.create_token(security.token_fingerprint(stale), user["id"], "reset", -1)   # already expired
+    for token in (stale, security.make_token(), "", "../../etc/passwd"):
+        st, out, _ = call("POST", "/api/auth/reset", {"token": token, "password": "What3ver-Pass9"})
+        assert st == 400, token
+
+    # a reset token must not work as a verification token, or the other way round
+    cross = security.make_token()
+    store.create_token(security.token_fingerprint(cross), user["id"], "verify", 3600)
+    assert call("POST", "/api/auth/reset", {"token": cross, "password": "What3ver-Pass9"})[0] == 400
+
+
+def test_password_reset_signs_out_every_existing_session():
+    user, token = new_user(email="sessions@example.com")
+    assert call("GET", "/api/auth/me", user=store.session_user(security.token_fingerprint(token)))[0] == 200
+    reset = security.make_token()
+    store.create_token(security.token_fingerprint(reset), user["id"], "reset", 3600)
+    call("POST", "/api/auth/reset", {"token": reset, "password": "Fresh-Pass12"})
+    assert store.session_user(security.token_fingerprint(token)) is None
+
+
+def test_reset_tokens_are_stored_only_as_a_fingerprint():
+    user, _ = new_user(email="fp@example.com")
+    token = security.make_token()
+    store.create_token(security.token_fingerprint(token), user["id"], "reset", 3600)
+    with store._conn() as c:                                    # noqa: SLF001 - checking storage itself
+        rows = [dict(r) for r in c.execute("SELECT * FROM tokens")]
+    assert rows and all(token not in str(r) for r in rows)
+
+
+# --------------------------------------------------- email verification
+def test_email_verification_marks_the_address_and_is_single_use():
+    user, _ = new_user(email="verify@example.com")
+    assert not store.get_user(user["id"])["email_verified"]
+    token = security.make_token()
+    store.create_token(security.token_fingerprint(token), user["id"], "verify", 3600)
+
+    st, out, _ = call("POST", "/api/auth/verify", {"token": token})
+    assert st == 200 and store.get_user(user["id"])["email_verified"]
+    assert call("POST", "/api/auth/verify", {"token": token})[0] == 400      # not twice
+
+
+def test_completing_a_reset_also_confirms_the_address():
+    """Opening the link proves control of the mailbox, so asking again would be theatre."""
+    user, _ = new_user(email="both@example.com")
+    token = security.make_token()
+    store.create_token(security.token_fingerprint(token), user["id"], "reset", 3600)
+    call("POST", "/api/auth/reset", {"token": token, "password": "Proven-Pass11"})
+    assert store.get_user(user["id"])["email_verified"]
+
+
+def test_mail_console_mode_never_logs_an_address_or_a_name(capsys):
+    from skillforge import mail
+    subject, body = mail.reset_email("Jaya Kiruthika", "https://example.com/reset.html?token=abc", 60)
+    mail.send("private.person@example.com", subject, body, link="https://example.com/reset.html?token=abc")
+    printed = capsys.readouterr().out
+    assert "private.person@example.com" not in printed
+    assert "Jaya Kiruthika" not in printed
+    assert "token=abc" in printed          # the developer still gets the link

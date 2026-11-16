@@ -10,12 +10,13 @@ cleared.
 
 | # | What | Who | Why it blocks |
 |---|---|---|---|
-| A1 | Decide the under-18 question and implement it — see `legal/README.md` | You | India's DPDP Act requires verifiable parental consent for anyone under 18. Your users are students. Shipping without a decision here is a legal risk, not a technical one |
+| ~~A1~~ | ~~Decide the under-18 question~~ — **done**: self sign-up now requires an 18+ declaration and terms acceptance, enforced on the server and in the browser engine. Under-18s are directed to enrol through their college | — | — |
 | A2 | Lawyer reviews `legal/TERMS-OF-SERVICE.md` and `legal/PRIVACY-POLICY.md`, and you fill in every `<<FILL: ...>>` | You + lawyer | The published pages say "draft, not in force" until this is done |
-| A3 | Put the database on a persistent disk, or move to Postgres — `docs/DEPLOYMENT.md` §1 | You | On most hosts every account is wiped on the next deploy |
-| A4 | Set `SKILLFORGE_SECRET` to a fixed random value, and `SKILLFORGE_ADMIN_EMAIL` to your address | You | Without the secret everyone is signed out on each deploy. Without the admin email the first stranger to sign up becomes admin |
+| A3 | Put the database on a persistent disk — `render.yaml`, `fly.toml` and the Dockerfile volume already do this; you only have to deploy with one of them | You | On most hosts every account is wiped on the next deploy. The server now prints a startup warning if it detects this |
+| A4 | Set `SKILLFORGE_SECRET` and `SKILLFORGE_ADMIN_EMAIL` | You | Both are now checked at startup and warned about. Render generates the secret for you |
 | A5 | Add a real support email to `LICENSE`, `SECURITY.md` and both legal documents | You | They currently say `<add your contact email before launch>` |
-| A6 | Password reset and email verification | Code change | Today a user who forgets their password cannot get back in, and any email address can be claimed without proving it |
+| ~~A6~~ | ~~Password reset and email verification~~ — **done**: single-use hashed tokens, no user enumeration, reset signs out every session, verification offered on the Account page | — | — |
+| A6b | Point `SKILLFORGE_SMTP_*` and `SKILLFORGE_BASE_URL` at a real mail provider | You | The reset flow is built and tested, but with no SMTP host it cannot post a letter. Startup warns when this is missing on a public server |
 
 ---
 
@@ -23,7 +24,7 @@ cleared.
 
 | # | What | Who |
 |---|---|---|
-| B1 | Daily automated backups, and test a restore — `docs/DEPLOYMENT.md` §7 | You |
+| B1 | Schedule `backend/backup.py` daily and copy the files off the machine, then test a restore — `docs/DEPLOYMENT.md` §7 | You |
 | B2 | Uptime monitoring on `/api/health` (UptimeRobot and Better Stack both have free tiers) | You |
 | B3 | Error tracking (Sentry has a free tier). Keep PII out of the events — the app logs none today, keep it that way | You + small code change |
 | B4 | Ship server logs off the host, with a retention period that matches the Privacy Policy | You |
@@ -66,6 +67,14 @@ cleared.
   canonical URLs, `robots.txt`, `sitemap.xml`, a real 404 page.
 - Licence, third-party notices, security policy, contributing guide, changelog,
   issue and PR templates, Dependabot.
+- Age assurance at sign-up (18+ declaration and terms acceptance, recorded as a
+  timestamp and terms version rather than a date of birth), enforced in both
+  engines.
+- Password reset and email verification: single-use tokens stored only as an
+  HMAC fingerprint, one hour and 24 hour expiries, no user enumeration, reset
+  ends every session, console mode that never logs an address or a name.
+- Backup and restore script with an integrity check, and deploy blueprints for
+  Render and Fly.io with the persistent volume already wired.
 - Dockerfile, compose file and a deployment guide for Render, Railway, Fly.io
   and a plain VPS.
 

@@ -16,7 +16,7 @@ import time
 import uuid
 from typing import Any, Dict, List, Optional, Tuple
 
-from . import store
+from . import mail, store
 from .institutions import find as find_institution
 from .security import (Env, clean_choice, clean_email, clean_int, clean_text, hash_password,
                        limiter, make_token, password_problem, token_fingerprint, verify_password)
@@ -24,6 +24,18 @@ from .security import (Env, clean_choice, clean_email, clean_int, clean_text, ha
 ROLES = ("student", "faculty", "admin")
 DEMO_DOMAIN = "@demo.skillforge.test"       # reserved: demo accounts only, cannot be registered
 TRUSTED = {"id": "__internal__", "role": "admin", "trusted": True}   # server-side callers (seed, tests)
+MIN_SIGNUP_AGE = 18                         # see the age gate in signup() and legal/README.md
+TERMS_VERSION = "2026-11-16"                # bump when the published terms change materially
+RESET_TTL_MINUTES = 60
+VERIFY_TTL_HOURS = 24
+
+
+def _now() -> str:
+    return time.strftime("%Y-%m-%d %H:%M:%S")
+
+
+def _truthy(v: Any) -> bool:
+    return str(v).strip().lower() in ("1", "true", "yes", "on")
 
 
 def is_demo_user(user: Optional[Dict[str, Any]]) -> bool:
@@ -66,6 +78,18 @@ def signup(data: Dict[str, Any], *, ip: str = "") -> Tuple[Dict[str, Any], str]:
         raise BadRequest("The two passwords do not match.")
     if email.endswith(DEMO_DOMAIN) and not data.get("_demo"):
         raise BadRequest("That email domain is reserved. Please use your own email address.")
+    # Age assurance. India's DPDP Act 2023 treats anyone under 18 as a child whose
+    # personal data needs verifiable parental consent, which this product does not
+    # implement, so self sign-up is 18+. Under-18s are meant to be enrolled by their
+    # institution instead - see legal/README.md. We record only that the declaration
+    # was made and when; a date of birth would be more personal data for no gain.
+    if not data.get("_demo"):
+        if not _truthy(data.get("age_confirmed")):
+            raise BadRequest(
+                f"You must confirm you are {MIN_SIGNUP_AGE} or over to create an account. "
+                "If you are younger, ask your college to enrol you.")
+        if not _truthy(data.get("terms_accepted")):
+            raise BadRequest("Please accept the Terms of Service and the Privacy Policy.")
     if store.get_user_by_email(email):
         raise BadRequest("An account with that email already exists. Try signing in instead.")
 
@@ -83,6 +107,9 @@ def signup(data: Dict[str, Any], *, ip: str = "") -> Tuple[Dict[str, Any], str]:
         "city": inst["city"] if inst else clean_text(data.get("city"), max_len=60),
         "district": inst["district"] if inst else clean_text(data.get("district"), max_len=60),
         "state": inst["state"] if inst else clean_text(data.get("state"), max_len=60) or "Tamil Nadu",
+        "age_confirmed": _now() if not data.get("_demo") else None,
+        "terms_accepted": _now() if not data.get("_demo") else None,
+        "terms_version": TERMS_VERSION if not data.get("_demo") else None,
     }
     # Who becomes admin?  Never chosen by the form.
     #  - SKILLFORGE_ADMIN_EMAIL set  -> only that email address
@@ -144,6 +171,99 @@ def change_password(user_id: str, current: str, new: str) -> None:
         raise BadRequest(problem)
     store.update_user(user_id, {"password_hash": hash_password(new)})
     store.end_all_sessions(user_id)          # sign out everywhere after a password change
+
+
+# ---------------------------------------------------------------------------
+# Password reset and email verification.
+#
+# Two rules shape all of this:
+#   * No user enumeration. Every response is the same whether or not the email
+#     belongs to an account, so the endpoint cannot be used to discover who has
+#     registered.
+#   * The token is a secret the user holds; the database keeps only its HMAC
+#     fingerprint, it works once, and it expires.
+def _link(page: str, token: str) -> str:
+    return f"{mail.base_url()}/{page}?token={token}"
+
+
+def request_password_reset(data: Dict[str, Any], *, ip: str = "") -> Dict[str, Any]:
+    """Send a reset link if the address belongs to an account. Says nothing either way."""
+    email = clean_email(data.get("email"))
+    generic = {"ok": True, "message": "If that email has an account, a reset link is on its way. "
+                                      "Check your inbox, and your spam folder."}
+    ok, _ = limiter.check(f"reset|{email or ip}", 5, 3600, block=0)
+    if not ok or not email:
+        return generic
+
+    row = store.get_user_by_email(email)
+    if not row or is_demo_user(row):
+        return generic                      # same answer, same timing shape
+
+    token = make_token()
+    store.create_token(token_fingerprint(token), row["id"], "reset", RESET_TTL_MINUTES * 60)
+    link = _link("reset.html", token)
+    subject, body = mail.reset_email(row["name"], link, RESET_TTL_MINUTES)
+    mail.send(row["email"], subject, body, link=link)   # a failure is not reported back, by design
+    return generic
+
+
+def reset_password(data: Dict[str, Any]) -> Dict[str, Any]:
+    """Finish a reset. The token proves the user controls the mailbox."""
+    token = str(data.get("token") or "").strip()
+    password = str(data.get("password") or "")
+    if not token:
+        raise BadRequest("That reset link is incomplete. Please request a new one.")
+    if data.get("confirm") is not None and str(data.get("confirm")) != password:
+        raise BadRequest("The two passwords do not match.")
+
+    user_id = store.consume_token(token_fingerprint(token), "reset")
+    if not user_id:
+        raise BadRequest("That reset link has expired or has already been used. "
+                         "Please request a new one.")
+    row = store.get_user(user_id)
+    if not row:
+        raise BadRequest("That account no longer exists.")
+
+    problem = password_problem(password, email=row["email"], name=row["name"])
+    if problem:
+        # The token was consumed, so say so plainly rather than let them retry blindly.
+        raise BadRequest(f"{problem} Please request a new reset link and try again.")
+
+    store.update_user(user_id, {"password_hash": hash_password(password),
+                                # Controlling the mailbox proves the address is theirs.
+                                "email_verified": _now()})
+    store.end_all_sessions(user_id)          # anyone already signed in is signed out
+    return {"ok": True, "message": "Your password has been changed. You can sign in with it now."}
+
+
+def request_verification(user: Dict[str, Any]) -> Dict[str, Any]:
+    """Send a confirm-your-address link to the signed-in user."""
+    if is_demo_user(user):
+        raise BadRequest("The demo account has no email address to confirm.")
+    if user.get("email_verified"):
+        return {"ok": True, "message": "Your email address is already confirmed."}
+    ok, retry = limiter.check(f"verify|{user['id']}", 4, 3600, block=0)
+    if not ok:
+        raise BadRequest(f"Too many emails requested. Try again in about {max(1, retry // 60)} minute(s).")
+
+    token = make_token()
+    store.create_token(token_fingerprint(token), user["id"], "verify", VERIFY_TTL_HOURS * 3600)
+    link = _link("verify.html", token)
+    subject, body = mail.verify_email(user["name"], link, VERIFY_TTL_HOURS)
+    sent, error = mail.send(user["email"], subject, body, link=link)
+    if not sent:
+        raise BadRequest(error or "The email could not be sent.")
+    return {"ok": True, "message": "Check your inbox for the confirmation link."}
+
+
+def verify_email(data: Dict[str, Any]) -> Dict[str, Any]:
+    token = str(data.get("token") or "").strip()
+    user_id = store.consume_token(token_fingerprint(token), "verify") if token else None
+    if not user_id:
+        raise BadRequest("That confirmation link has expired or has already been used. "
+                         "Sign in and ask for a new one.")
+    store.update_user(user_id, {"email_verified": _now()})
+    return {"ok": True, "message": "Thank you — your email address is confirmed."}
 
 
 CONSENT_KEYS = ("essential", "analytics", "marketing", "ai_processing")

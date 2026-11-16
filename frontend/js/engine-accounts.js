@@ -36,6 +36,8 @@ export function passwordProblem(p, email = "", name = "") {
 }
 
 class Http extends Error { constructor(status, msg) { super(msg); this.status = status; } }
+const MIN_SIGNUP_AGE = 18;                 // keep in step with backend/skillforge/auth.py
+const TERMS_VERSION = "2026-11-16";
 const DEMO_DOMAIN = "@demo.skillforge.test";       // reserved for demo accounts; cannot be registered
 const DEMO = [
   ["Demo Admin", "admin@demo.skillforge.test", "rathinam-technical-campus", "Administration", "admin"],   // web demo only: data never leaves this browser
@@ -113,13 +115,19 @@ export function createAccounts(engine) {
       if (!email) throw new Http(400, "Please enter a valid email address.");
       const prob = passwordProblem(password, email, name); if (prob) throw new Http(400, prob);
       if (b.confirm != null && String(b.confirm) !== password) throw new Http(400, "The two passwords do not match.");
+      // Same age gate as the server: self sign-up is 18+, because under India's DPDP
+      // Act a child's data needs verifiable parental consent, which we do not implement.
+      const truthy = (v) => ["1", "true", "yes", "on"].includes(String(v).trim().toLowerCase());
+      if (!truthy(b.age_confirmed)) throw new Http(400, `You must confirm you are ${MIN_SIGNUP_AGE} or over to create an account. If you are younger, ask your college to enrol you.`);
+      if (!truthy(b.terms_accepted)) throw new Http(400, "Please accept the Terms of Service and the Privacy Policy.");
       const d = read();
       if (email.endsWith(DEMO_DOMAIN)) throw new Http(400, "That email domain is reserved. Please use your own email address.");
       if (d.users.some((u) => u.email === email)) throw new Http(400, "An account with that email already exists. Try signing in instead.");
       const inst = findInstitution(b.institution_id || b.institution || "");
       const user = { id: `${slug(name)}-${Math.random().toString(16).slice(2, 8)}`, email, password_hash: await hashPassword(password), name, role, learner_id: null,
         institution_id: inst?.id || null, institution: inst?.name || cleanText(b.institution, 120), department: cleanText(b.department, 80),
-        city: inst?.city || cleanText(b.city, 60), district: inst?.district || cleanText(b.district, 60), state: inst?.state || "Tamil Nadu", created: new Date().toISOString() };
+        city: inst?.city || cleanText(b.city, 60), district: inst?.district || cleanText(b.district, 60), state: inst?.state || "Tamil Nadu", created: new Date().toISOString(),
+        age_confirmed: new Date().toISOString(), terms_accepted: new Date().toISOString(), terms_version: TERMS_VERSION };
       if (role !== "faculty") {                       // students and the first (admin) account get a profile
         const res = engine.svc.saveProfile({ id: "u-" + user.id, name, email, institution_id: user.institution_id, institution: user.institution, education: user.department, target_role: "Full Stack Developer", hours_per_week: 8, skills: [], listed: true }, { owner: user.id });
         user.learner_id = res.learner.id;
@@ -127,6 +135,18 @@ export function createAccounts(engine) {
       d.users.push(user); write(d);
       try { localStorage.setItem(SESSION, user.id); } catch (_) {}
       return { user: safe(user) };
+    },
+    // No server, no mailbox: a reset link cannot be sent from a page that only has
+    // this browser's own storage. Say so plainly instead of pretending to send one.
+    async "POST /api/auth/forgot"() {
+      throw new Http(400, "The browser version keeps your account in this browser only, so it cannot email a reset link. "
+        + "Sign in on the same browser, or run the full version to use password reset.");
+    },
+    async "POST /api/auth/reset"() {
+      throw new Http(400, "Password reset needs the full version with a server. In the browser version, use Account - change password while signed in.");
+    },
+    async "POST /api/auth/verify"() {
+      throw new Http(400, "Email confirmation needs the full version with a server.");
     },
     async "POST /api/auth/login"(q, b) {
       const email = cleanEmail(b.email), d = read(), now = Date.now();

@@ -59,7 +59,8 @@ const PAGES = [
   ["privacy", "privacy.html", "🔐", "Data Privacy", "", "More", "What we keep, download it, or delete it"],
   ["guide", "guide.html", "?", "Guide", "", "More", "How to use everything"],
 ];
-const HIDDEN_PAGES = { signup: "Sign up", login: "Sign in", account: "Account" };
+const HIDDEN_PAGES = { signup: "Sign up", login: "Sign in", account: "Account",
+  forgot: "Reset password", reset: "Reset password", verify: "Confirm email" };
 const FEATURES6 = [
   ["profile", "1", "User Profile", "Learner details, existing skills, certifications, projects, dream company and career goal.", "#3cf0ff"],
   ["analysis", "2", "Skill Analysis", "Strengths and weaknesses from your skills and assessments — scored for every industry.", "#8b5cff"],
@@ -310,6 +311,9 @@ const NOTES = {
   contact: ["Send a message", ["Fill in your name and email.", "Choose a subject and write at least 10 characters.", "Press Send — the message is stored in the database.", "An admin can read it from their Account page."], ""],
   consent: ["Data Consent — your choices", ["Essential is always on: your sign-in and the display settings you pick.", "Analytics, Marketing and AI processing stay OFF until you switch them on.", "Use Accept all, Reject non-essential, or set each one and press Save preferences.", "Switching one off also deletes whatever it had collected."], "Tip: with AI processing off, your answers are graded by the built-in rules on the server and never leave it."],
   privacy: ["Data Privacy — what we keep", ["The table lists every kind of data we store and why we store it.", "Download my data gives you a JSON file with everything about your account.", "Delete my account & data erases it all permanently, after you type DELETE.", "To stop appearing in college lists without deleting, use the checkbox on your Profile."], "Your password is never stored — only an unreadable hash, and it is never included in the download."],
+  forgot: ["Forgot your password?", ["Type the email address you signed up with.", "Press the button — if that address has an account, a link is emailed to it.", "The link works once and expires after an hour.", "Asking again cancels any earlier link."], "We never say whether an address has an account — that would let anyone test who has registered."],
+  reset: ["Choose a new password", ["Open this page from the link in your email, not from a bookmark.", "Pick a password of 8+ characters with a letter and a number.", "Setting it signs you out on every other device.", "The link stops working once used."], ""],
+  verify: ["Confirm your email", ["Open this page from the link in your email.", "Confirming lets you recover your account if you forget your password.", "The link works once and expires after 24 hours.", "Need another? Sign in and ask from your Account page."], ""],
   guide: ["How to use SkillForge AI", ["Start on the Dashboard with the sample learner, or create your own profile.", "Follow the 6 feature pages in order: Profile → Analysis → Career → Learning → Progress → Mentor.", "Prove skills in the Skill Arena and see your position on the Skill World map.", "Change your goal anytime — nothing you mastered is lost."], ""],
 };
 function note(tab) {
@@ -332,7 +336,8 @@ function renderPage() {
   const fns = { app: pDashboard, profile: pProfile, analysis: pAnalysis, career: pCareer, learn: pLearn, world: pWorld, arena: pArena, progress: pProgress, mentor: pMentor, org: pOrg, guide: pGuide,
     signup: w(P2.pSignup), login: w(P2.pLogin), account: w(P2.pAccount), colleges: w(P2.pColleges), places: w(P2.pPlaces), browse: w(P2.pBrowse), faculty: w(P2.pFaculty), portal: w(P2.pPortal),
     compete: w(P2.pCompete), agents: w(P2.pAgents), games: w(P2.pGames), about: w(P2.pAbout), contact: w(P2.pContact),
-    consent: w(PV.pConsent), privacy: w(PV.pPrivacy) };
+    consent: w(PV.pConsent), privacy: w(PV.pPrivacy),
+    forgot: w(P2.pForgot), reset: w(P2.pReset), verify: w(P2.pVerify) };
   const needsLearner = ["app", "analysis", "career", "learn", "world", "arena", "progress", "mentor", "games", "compete"].includes(PAGE);
   if (needsLearner && !S.learner) { el.innerHTML = note(PAGE) + `<div class="card"><h3>No learner yet</h3><p class="muted">Create a profile to start.</p><a class="btn primary" href="profile.html?new=1">Create profile</a></div>`; return; }
   const out = (fns[PAGE] || pDashboard)(el);

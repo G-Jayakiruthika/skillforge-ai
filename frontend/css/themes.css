@@ -328,3 +328,13 @@ body.hc .set-warn { border-width: 2px; }
 #diag-box table { border-collapse: collapse; margin: 10px 0; width: 100%; }
 #diag-box td { padding: 3px 8px 3px 0; vertical-align: top; word-break: break-all; border-top: 1px solid rgba(255, 255, 255, .12); }
 #diag-box td:first-child { color: var(--accent); white-space: nowrap; }
+
+/* ---------- sign-up declarations ---------- */
+.declare { display: grid; gap: 10px; padding: 14px 16px; border-radius: 12px;
+  border: 1px solid var(--line); background: var(--glass); }
+.declare .opt { display: flex; gap: 10px; align-items: flex-start; cursor: pointer;
+  font-size: calc(13.5px * var(--text-scale)); line-height: 1.5; }
+.declare .opt input { margin: 2px 0 0; width: 18px; height: 18px; flex: none; accent-color: var(--accent); }
+.declare .opt a { color: var(--accent); }
+.declare p { margin: 2px 0 0; }
+body.hc .declare { border-width: 2px; }

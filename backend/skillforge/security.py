@@ -113,7 +113,31 @@ class Env:
             out.append("Server is public but SKILLFORGE_ADMIN_EMAIL is not set - nobody can become admin.")
         if cls.gemini_key and len(cls.gemini_key) < 20:
             out.append("GEMINI_API_KEY looks too short to be valid.")
+        if cls.public and not os.getenv("SKILLFORGE_SECRET"):
+            out.append("SKILLFORGE_SECRET is not set - the signing key is a generated file, so every "
+                       "redeploy signs all users out. Set it to a fixed random value.")
+        out.extend(cls._storage_warnings())
         return out
+
+    # The single most expensive mistake available on a PaaS: running publicly with the
+    # database inside the application directory, which most hosts replace on each deploy.
+    # Every account then disappears at the next push, silently.
+    @classmethod
+    def _storage_warnings(cls) -> List[str]:
+        if not cls.public:
+            return []
+        from pathlib import Path as _Path
+        app_dir = _Path(__file__).resolve().parent.parent
+        db = _Path(cls.db_path).resolve() if cls.db_path else (app_dir / "data" / "skillforge.db")
+        try:
+            inside_app = db == app_dir or app_dir in db.parents
+        except OSError:
+            inside_app = False
+        if inside_app:
+            return ["Server is public but the database lives inside the application folder "
+                    f"({db}). Most hosts wipe that folder on every deploy, which would delete every "
+                    "account. Point SKILLFORGE_DB at a mounted volume - see docs/DEPLOYMENT.md."]
+        return []
 
 
 def allowed_origins() -> List[str]:
@@ -301,6 +325,9 @@ limiter = RateLimiter()
 RATE_RULES: List[Tuple[str, int, float, float]] = [
     ("/api/auth/login", 8, 300, 900),      # 8 failures / 5 min -> 15 min lockout
     ("/api/auth/signup", 5, 3600, 0),      # 5 new accounts per hour per IP
+    ("/api/auth/forgot", 5, 3600, 0),      # 5 reset emails per hour per IP
+    ("/api/auth/reset", 10, 3600, 0),      # guessing a token is hopeless, but cap it anyway
+    ("/api/auth/verify", 10, 3600, 0),
     ("/api/contact", 5, 3600, 0),          # 5 contact messages per hour per IP
     ("/api/auth/demo", 20, 3600, 0),       # demo sessions
     ("/api/faculty/", 30, 3600, 0),        # questions to faculty

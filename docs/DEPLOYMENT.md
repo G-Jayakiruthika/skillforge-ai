@@ -29,6 +29,12 @@ Then set these, whatever host you use:
 | `SKILLFORGE_CORS_ORIGINS` | `https://yourdomain.com` | Never `*` |
 | `SKILLFORGE_ADMIN_EMAIL` | your email | Otherwise the first account to sign up becomes admin |
 | `SKILLFORGE_DB` | a path on a persistent disk | See the database warning below |
+| `SKILLFORGE_BASE_URL` | `https://yourdomain.com` | Where password-reset links point |
+| `SKILLFORGE_SMTP_*` | your mail provider's settings | Without them, password reset cannot send mail |
+
+The server prints a warning at startup for each of these that is wrong or
+missing, including one if the database is sitting somewhere a redeploy will
+erase. Read the first few lines of the log after your first deploy.
 
 `backend/.env.example` documents every variable.
 
@@ -107,11 +113,16 @@ The app already sends HSTS and the other security headers once it sees HTTPS.
 
 ## 3. Render
 
-1. New → Web Service → connect this repository.
-2. Runtime **Docker** (it picks up the `Dockerfile` automatically).
-3. Add a **Disk**: mount path `/data`, 1 GB is plenty to start.
-4. Environment variables: the table in section 0, with `SKILLFORGE_DB=/data/skillforge.db`.
-5. Health check path: `/api/health`.
+`render.yaml` is in the repository, so the service, the 1 GB disk at `/data`
+and the health check are already described:
+
+1. New → **Blueprint** → connect this repository.
+2. Render reads `render.yaml` and creates everything.
+3. Fill in the values marked `sync: false` in the dashboard: your origin, base
+   URL, admin email and SMTP settings.
+
+`SKILLFORGE_SECRET` is generated once by Render and kept across deploys, so
+nobody gets signed out by a push.
 
 Render's free tier sleeps after inactivity; the first request then takes ~30
 seconds. Fine for a demo, not for a launch.
@@ -166,15 +177,25 @@ In `fly.toml`, mount the volume and keep one machine:
 
 ## 7. Backups
 
-SQLite backs up with one command, and it is safe while the app is running:
+`backend/backup.py` takes a consistent snapshot while the server is running,
+verifies it opens, and reports how many accounts it holds:
 
 ```bash
-sqlite3 /data/skillforge.db ".backup '/backups/skillforge-$(date +%F).db'"
+cd backend
+python backup.py --dir /backups --keep 30     # daily cron
+python backup.py --list
+python backup.py --restore /backups/skillforge-20261116-031700.db
 ```
 
-Put that in a daily cron job, keep 30 days, and copy the files off the server —
-a backup on the same disk is not a backup. Restore by stopping the app, copying
-the file back to `SKILLFORGE_DB`, and starting it again.
+Daily cron entry:
+
+```
+17 3 * * * cd /app/backend && python backup.py --dir /backups --keep 30
+```
+
+A backup on the same disk as the database is not a backup — copy the files off
+the machine with rclone, scp or your host's object storage. Restore moves the
+existing database aside first, so a bad restore is recoverable.
 
 Test a restore before you need one.
 
@@ -194,8 +215,24 @@ whole privacy path works on the real host.
 
 ---
 
-## 9. What is still missing for a large launch
+## 9. Email
 
-Tracked in `docs/LAUNCH-CHECKLIST.md`: email verification and password reset,
-off-host log shipping, an uptime monitor, error tracking, and the Postgres
-migration above.
+Password reset and email verification need SMTP. Any provider works — Brevo,
+Resend, Mailgun, Amazon SES, Zoho Mail, or Gmail with an app password — and the
+free tiers are generous at this scale.
+
+Set `SKILLFORGE_SMTP_HOST`, `SKILLFORGE_SMTP_PORT`, `SKILLFORGE_SMTP_USER`,
+`SKILLFORGE_SMTP_PASSWORD`, `SKILLFORGE_MAIL_FROM` and `SKILLFORGE_BASE_URL`.
+
+Without a host configured the app runs in console mode: links are printed to
+the server log rather than sent, which is useful locally and refused when
+`SKILLFORGE_PUBLIC=1`. Console mode prints the subject and the link only — never
+the recipient's address or name, because a log is not a place for personal data.
+
+After configuring it, test on the real host: sign up, sign out, use **Forgot
+your password?**, and check the email arrives and the link works.
+
+## 10. What is still missing for a large launch
+
+Tracked in `docs/LAUNCH-CHECKLIST.md`: off-host log shipping, an uptime
+monitor, error tracking, and the Postgres migration above.

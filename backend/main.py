@@ -19,7 +19,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import FileResponse, JSONResponse, Response
 from fastapi.staticfiles import StaticFiles
 
-from skillforge import auth, routes, security, service
+from skillforge import auth, mail, routes, security, service
 from skillforge.security import Env
 
 FRONTEND = Path(__file__).resolve().parent.parent / "frontend"
@@ -46,6 +46,8 @@ def _startup() -> None:
     service.seed_demo()
     for w in Env.warnings():
         print(f"  [security] {w}")
+    for w in mail.warnings():
+        print(f"  [mail]     {w}")
 
 
 @app.middleware("http")

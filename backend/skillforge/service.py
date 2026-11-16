@@ -425,6 +425,23 @@ def me(user: Optional[Dict[str, Any]]) -> Dict[str, Any]:
     return {"user": u, "signed_in": bool(user), "demo_logins": not security.Env.public}
 
 
+def forgot_password(body, ip=""):
+    """Always answers the same way, so the endpoint cannot reveal who has an account."""
+    return auth.request_password_reset(body, ip=ip)
+
+
+def reset_password(body):
+    return auth.reset_password(body)
+
+
+def send_verification(user):
+    return auth.request_verification(user)
+
+
+def verify_email(body):
+    return auth.verify_email(body)
+
+
 def change_password(user: Optional[Dict[str, Any]], data: Dict[str, Any]) -> Dict[str, Any]:
     u = auth.require(user)
     auth.change_password(u["id"], str(data.get("current") or ""), str(data.get("new") or ""))

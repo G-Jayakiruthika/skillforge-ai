@@ -18,7 +18,7 @@ from pathlib import Path
 from urllib.parse import parse_qs, urlparse
 
 sys.path.insert(0, str(Path(__file__).resolve().parent))
-from skillforge import auth, routes, security, service  # noqa: E402
+from skillforge import auth, mail, routes, security, service  # noqa: E402
 from skillforge.security import Env  # noqa: E402
 
 FRONTEND = Path(__file__).resolve().parent.parent / "frontend"
@@ -132,6 +132,8 @@ def main(port: int = 8000) -> None:
     print(f"SkillForge AI running at http://localhost:{port}  (engine: {h['agent_engine']}, Gemini: {h['gemini']})")
     for w in Env.warnings():
         print(f"  [security] {w}")
+    for w in mail.warnings():
+        print(f"  [mail]     {w}")
     print("  press Ctrl+C to stop")
     ThreadingHTTPServer(("127.0.0.1", port), Handler).serve_forever()
 

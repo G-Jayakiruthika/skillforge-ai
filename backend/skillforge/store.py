@@ -38,11 +38,26 @@ CREATE TABLE IF NOT EXISTS contacts (
 CREATE TABLE IF NOT EXISTS messages (
   id INTEGER PRIMARY KEY AUTOINCREMENT, from_user TEXT NOT NULL, from_name TEXT, to_user TEXT NOT NULL,
   to_name TEXT, body TEXT NOT NULL, created TEXT DEFAULT CURRENT_TIMESTAMP, reply TEXT, replied TEXT);
+CREATE TABLE IF NOT EXISTS tokens (
+  fp TEXT PRIMARY KEY, user_id TEXT NOT NULL, purpose TEXT NOT NULL,
+  created REAL NOT NULL, expires REAL NOT NULL, used REAL);
+CREATE INDEX IF NOT EXISTS idx_tokens_user ON tokens(user_id, purpose);
 CREATE INDEX IF NOT EXISTS idx_messages_to ON messages(to_user);
 CREATE INDEX IF NOT EXISTS idx_messages_from ON messages(from_user);
 CREATE INDEX IF NOT EXISTS idx_users_inst ON users(institution_id);
 CREATE INDEX IF NOT EXISTS idx_sessions_user ON sessions(user_id);
 """
+
+
+# Columns added after the first release. Each statement is a literal, so nothing
+# is ever interpolated into SQL, not even a name this file controls.
+_USER_MIGRATIONS = {
+    "consent": "ALTER TABLE users ADD COLUMN consent TEXT",
+    "age_confirmed": "ALTER TABLE users ADD COLUMN age_confirmed TEXT",
+    "terms_accepted": "ALTER TABLE users ADD COLUMN terms_accepted TEXT",
+    "terms_version": "ALTER TABLE users ADD COLUMN terms_version TEXT",
+    "email_verified": "ALTER TABLE users ADD COLUMN email_verified TEXT",
+}
 
 
 def _conn() -> sqlite3.Connection:
@@ -51,8 +66,10 @@ def _conn() -> sqlite3.Connection:
     c = sqlite3.connect(DB_PATH, check_same_thread=False)
     c.row_factory = sqlite3.Row
     c.executescript(_SCHEMA)
-    if "consent" not in {r["name"] for r in c.execute("PRAGMA table_info(users)")}:
-        c.execute("ALTER TABLE users ADD COLUMN consent TEXT")          # migrate older databases
+    have = {r["name"] for r in c.execute("PRAGMA table_info(users)")}
+    for col, statement in _USER_MIGRATIONS.items():                     # migrate older databases
+        if col not in have:
+            c.execute(statement)
     if first:
         try:
             os.chmod(DB_PATH, 0o600)         # owner-only
@@ -98,6 +115,7 @@ def delete_user_fully(user_id: str, learner_id: Optional[str]) -> Dict[str, int]
         if learner_id:
             counts["learners"] = c.execute("DELETE FROM learners WHERE id=?", (learner_id,)).rowcount
         counts["sessions"] = c.execute("DELETE FROM sessions WHERE user_id=?", (user_id,)).rowcount
+        c.execute("DELETE FROM tokens WHERE user_id=?", (user_id,))
         row = c.execute("SELECT email FROM users WHERE id=?", (user_id,)).fetchone()
         counts["messages"] = c.execute("DELETE FROM messages WHERE from_user=? OR to_user=?",
                                        (user_id, user_id)).rowcount
@@ -119,7 +137,8 @@ def delete_demo_learners() -> int:
 
 # ---------------------------------------------------------------- users
 USER_PUBLIC = ("id", "email", "name", "role", "learner_id", "institution_id", "institution",
-               "department", "city", "district", "state", "created", "last_login", "consent")
+               "department", "city", "district", "state", "created", "last_login", "consent",
+               "age_confirmed", "terms_accepted", "terms_version", "email_verified")
 
 
 def _user_dict(row: Optional[sqlite3.Row]) -> Optional[Dict[str, Any]]:
@@ -136,7 +155,8 @@ def _user_dict(row: Optional[sqlite3.Row]) -> Optional[Dict[str, Any]]:
 
 def create_user(user: Dict[str, Any]) -> Dict[str, Any]:
     cols = ("id", "email", "password_hash", "name", "role", "learner_id", "institution_id",
-            "institution", "department", "city", "district", "state")
+            "institution", "department", "city", "district", "state",
+            "age_confirmed", "terms_accepted", "terms_version")
     with _lock, _conn() as c:
         c.execute(f"INSERT INTO users ({','.join(cols)}) VALUES ({','.join('?' * len(cols))})",
                   tuple(user.get(k) for k in cols))
@@ -158,7 +178,7 @@ def get_user_by_email(email: str) -> Optional[Dict[str, Any]]:
 # Column names that may be updated. Keys are matched against this frozen set before they
 # reach SQL, so a request can never name an arbitrary column.
 UPDATABLE = frozenset({"consent", "name", "role", "learner_id", "institution_id", "institution", "department",
-                       "city", "district", "state", "password_hash", "last_login"})
+                       "city", "district", "state", "password_hash", "last_login", "email_verified"})
 
 
 def update_user(user_id: str, fields: Dict[str, Any]) -> Optional[Dict[str, Any]]:
@@ -185,6 +205,38 @@ def list_users(role: Optional[str] = None, institution_id: Optional[str] = None)
 def count_users() -> int:
     with _lock, _conn() as c:
         return int(c.execute("SELECT COUNT(*) FROM users").fetchone()[0])
+
+
+# ----------------------------------------------- one-time tokens (reset, verify)
+# Only a fingerprint is stored, exactly as for sessions, so a stolen database
+# cannot be used to reset anyone's password. A token is single use: consuming it
+# stamps `used`, and an already-used or expired token is refused.
+def create_token(fp: str, user_id: str, purpose: str, ttl_seconds: float) -> None:
+    now = time.time()
+    with _lock, _conn() as c:
+        # One live token per purpose per user: asking again invalidates the old link.
+        c.execute("DELETE FROM tokens WHERE user_id=? AND purpose=?", (user_id, purpose))
+        c.execute("INSERT INTO tokens (fp, user_id, purpose, created, expires) VALUES (?,?,?,?,?)",
+                  (fp, user_id, purpose, now, now + ttl_seconds))
+        c.execute("DELETE FROM tokens WHERE expires < ?", (now - 86400,))
+
+
+def consume_token(fp: str, purpose: str) -> Optional[str]:
+    """Return the user id if the token is live, and mark it used. Otherwise None."""
+    now = time.time()
+    with _lock, _conn() as c:
+        row = c.execute("SELECT user_id, expires, used FROM tokens WHERE fp=? AND purpose=?",
+                        (fp, purpose)).fetchone()
+        if not row or row["used"] is not None or row["expires"] < now:
+            return None
+        c.execute("UPDATE tokens SET used=? WHERE fp=?", (now, fp))
+        return row["user_id"]
+
+
+def token_count(user_id: str, purpose: str) -> int:
+    with _lock, _conn() as c:
+        return c.execute("SELECT COUNT(*) FROM tokens WHERE user_id=? AND purpose=? AND used IS NULL",
+                         (user_id, purpose)).fetchone()[0]
 
 
 # ---------------------------------------------------------------- sessions

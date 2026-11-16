@@ -61,6 +61,11 @@ export function pSignup(el, c) {
       <div class="field"><label class="lbl" for="su-dept" id="su-dept-lbl">Degree / course</label><input id="su-dept" maxlength="80" placeholder="e.g. MCA, B.E. Mechanical, B.Com"></div>
       <div class="row"><div class="field grow"><label class="lbl" for="su-pw">Password</label><input id="su-pw" type="password" autocomplete="new-password" required minlength="8" maxlength="200" data-tip="At least 8 characters with a letter and a number"><div class="pw-meter"><i id="su-meter"></i></div><div class="field-err" id="su-pw-err" aria-live="polite"></div></div>
         <div class="field grow"><label class="lbl" for="su-pw2">Confirm password</label><input id="su-pw2" type="password" autocomplete="new-password" required maxlength="200"></div></div>
+      <div class="field declare">
+        <label class="opt" for="su-age"><input type="checkbox" id="su-age" required> <span>I confirm I am <b>18 years or older</b>.</span></label>
+        <label class="opt" for="su-terms"><input type="checkbox" id="su-terms" required> <span>I accept the <a href="terms.html" target="_blank" rel="noopener">Terms of Service</a> and the <a href="privacy.html" target="_blank" rel="noopener">Privacy Policy</a>.</span></label>
+        <p class="small muted">Under 18? Ask your college to enrol you — we are not able to open an account for you directly.</p>
+      </div>
       <input class="hp" tabindex="-1" autocomplete="off" id="su-hp" aria-hidden="true">
       <button class="btn primary" type="submit" data-tip="Creates your account and signs you in">Create account</button> <a href="login.html" class="small" style="margin-left:10px">Already have an account? Sign in</a>
       <div id="su-msg" aria-live="assertive"></div></form>
@@ -77,7 +82,13 @@ export function pSignup(el, c) {
     e.preventDefault(); const msg = el.querySelector("#su-msg");
     if (el.querySelector("#su-hp").value) return;                                  // honeypot
     const body = { role, name: el.querySelector("#su-name").value, email: el.querySelector("#su-email").value, institution_id: el.querySelector("#su-inst").value,
-      department: el.querySelector("#su-dept").value, password: pw.value, confirm: el.querySelector("#su-pw2").value };
+      department: el.querySelector("#su-dept").value, password: pw.value, confirm: el.querySelector("#su-pw2").value,
+      age_confirmed: el.querySelector("#su-age").checked, terms_accepted: el.querySelector("#su-terms").checked };
+    // Checked again on the server; this only saves a round trip and names the box to tick.
+    if (!body.age_confirmed || !body.terms_accepted) {
+      msg.innerHTML = `<div class="form-msg bad">Please confirm your age and accept the terms.</div>`;
+      c.sound.play("bad"); return;
+    }
     try {
       const r = await c.api("api/auth/signup", body); c.S.user = r.user; pw.value = el.querySelector("#su-pw2").value = "";
       if (r.user.learner_id) { try { localStorage.setItem("sf-learner", r.user.learner_id); } catch (_) {} }
@@ -95,6 +106,7 @@ export function pLogin(el, c) {
       <div class="field"><label class="lbl" for="li-email">Email</label><input id="li-email" type="email" autocomplete="email" required maxlength="254"></div>
       <div class="field"><label class="lbl" for="li-pw">Password</label><input id="li-pw" type="password" autocomplete="current-password" required maxlength="200"></div>
       <button class="btn primary" type="submit">Sign in</button> <a href="signup.html" class="small" style="margin-left:10px">New here? Create an account</a>
+      <a href="forgot.html" class="small" style="margin-left:10px">Forgot your password?</a>
       <div id="li-msg" aria-live="assertive"></div></form>
     <div class="card"><h3>Try the demo — no password</h3><p class="small muted">Demo sessions only ever open the <b>fictional sample learners</b>, never a real student's profile. There is no shared demo password, and demo sessions are switched off on public servers.</p>
       <div class="chips"><button class="chip" data-demo="faculty" data-tip="See the faculty portal as a sample faculty member at Rathinam Technical Campus">👩‍🏫 Enter as demo faculty</button>${c.S.mode === "web" ? `<button class="chip" data-demo="admin" data-tip="Web demo only: sees every page, using the data stored in this browser">🛡 Enter as demo admin</button>` : ""}</div>
@@ -123,12 +135,29 @@ export async function pAccount(el, c) {
       <div class="card" style="margin-top:16px"><h3>🛡 Admin · server configuration</h3><table><tr><td>Debug mode</td><td><span class="badge ${cfg.debug ? "bad" : "ok"}">${cfg.debug ? "ON" : "off"}</span></td></tr><tr><td>Gemini key</td><td>${cfg.gemini_configured ? `configured <span class="cred">${esc(cfg.gemini_key_preview || "")}</span>` : "not set"}</td></tr><tr><td>Allowed origins (CORS)</td><td class="small">${(cfg.cors_origins || []).map(esc).join(", ")}</td></tr><tr><td>Session secret</td><td class="small">${esc(cfg.secret_source)}</td></tr></table>${(cfg.warnings || []).map((w) => `<div class="form-msg bad">${esc(w)}</div>`).join("")}</div>`;
     } catch (_) {}
   }
-  el.innerHTML = `${c.head(`Account <span class="grad">· ${esc(u.name)}</span>`, `${esc(u.role)} · ${esc(u.institution || "no institution")}`)}${demoBanner(c)}
+  // An unconfirmed address cannot receive a reset link, so say so where it matters.
+  const verifyBanner = (!u.demo && !u.email_verified)
+    ? `<div class="card" id="verify-card" style="border-color:var(--amber)"><h3>✉ Confirm your email address</h3>
+        <p class="small muted">Your address has not been confirmed yet. Confirming it is what lets you get back in
+        if you ever forget your password — without it, there is nowhere to send a reset link.</p>
+        <button class="btn primary sm" id="btn-verify" data-tip="Sends a confirmation link to ${esc(u.email)}">Send me the link</button>
+        <div id="verify-msg" aria-live="polite"></div></div>`
+    : "";
+  el.innerHTML = `${c.head(`Account <span class="grad">· ${esc(u.name)}</span>`, `${esc(u.role)} · ${esc(u.institution || "no institution")}`)}${demoBanner(c)}${verifyBanner}
   <div class="grid g2"><div class="card"><h3>Your details</h3><table><tr><td>Name</td><td><b>${esc(u.name)}</b></td></tr><tr><td>Email</td><td>${esc(u.email)}</td></tr><tr><td>Role</td><td><span class="badge brand">${esc(u.role)}</span></td></tr>
       <tr><td>Institution</td><td>${esc(u.institution || "—")}</td></tr><tr><td>${u.role === "faculty" ? "Department" : "Course"}</td><td>${esc(u.department || "—")}</td></tr><tr><td>Location</td><td>${esc([u.city, u.district, u.state].filter(Boolean).join(", ") || "—")}</td></tr></table>
       <div class="row" style="margin-top:14px">${u.role === "student" ? `<a class="btn primary sm" href="app.html">My dashboard</a>` : `<a class="btn primary sm" href="portal.html">My students</a>`}<button class="btn ghost sm" id="btn-logout" data-tip="Sign out of this device">Sign out</button></div></div>
     <form class="card" id="f-pw"><h3>Change password</h3><div class="field"><label class="lbl" for="cp-cur">Current password</label><input id="cp-cur" type="password" autocomplete="current-password" maxlength="200"></div>
       <div class="field"><label class="lbl" for="cp-new">New password</label><input id="cp-new" type="password" autocomplete="new-password" maxlength="200"></div><button class="btn sm" type="submit" data-tip="You will be signed out everywhere and asked to sign in again">Update password</button><div id="cp-msg" aria-live="assertive"></div></form></div>${inbox}`;
+  const vb = el.querySelector("#btn-verify");
+  if (vb) vb.onclick = async () => {
+    const msg = el.querySelector("#verify-msg");
+    vb.disabled = true; msg.innerHTML = `<div class="form-msg">Sending…</div>`;
+    try {
+      const r = await c.api("api/auth/verify/send", {});
+      msg.innerHTML = `<div class="form-msg ok">${esc(r.message)}</div>`;
+    } catch (x) { msg.innerHTML = `<div class="form-msg bad">${esc(x.message)}</div>`; vb.disabled = false; }
+  };
   el.querySelector("#btn-logout").onclick = async () => { await c.api("api/auth/logout", {}); c.S.user = null; c.toast("Signed out"); c.go("index.html", "Signed out"); };
   el.querySelector("#f-pw").onsubmit = async (e) => { e.preventDefault(); const m = el.querySelector("#cp-msg");
     try { const r = await c.api("api/auth/password", { current: el.querySelector("#cp-cur").value, new: el.querySelector("#cp-new").value }); c.S.user = null; m.innerHTML = `<div class="form-msg ok">${esc(r.message)}</div>`; setTimeout(() => c.go("login.html", "Sign in"), 1200); }
@@ -392,4 +421,98 @@ export function pContact(el, c) {
       out.innerHTML = `<div class="form-msg ok">${esc(r.message || "Thank you — your message has been saved.")} Reference #${Number(r.id) || 0}.</div>`; msg.value = ""; el.querySelector("#ct-len").textContent = "0"; c.sound.play("good"); c.confetti();
     } catch (x) { out.innerHTML = `<div class="form-msg bad">${esc(x.message)}</div>`; c.sound.play("bad"); }
   };
+}
+
+/* ---------- password reset and email verification ----------
+   The server never says whether an address has an account, so neither do these
+   pages: the "check your inbox" message is shown either way. */
+export function pForgot(el, c) {
+  const { esc } = c;
+  el.innerHTML = `${c.head("Forgot your password?", "We'll email you a link to set a new one")}${c.note("forgot")}
+  <div class="auth-wrap"><form class="card" id="f-forgot" novalidate>
+      <div class="field"><label class="lbl" for="fg-email">The email you signed up with</label>
+        <input id="fg-email" type="email" autocomplete="email" required maxlength="254"></div>
+      <button class="btn primary" type="submit" data-tip="Sends a single-use link that expires in an hour">Email me a reset link</button>
+      <a href="login.html" class="small" style="margin-left:10px">Back to sign in</a>
+      <div id="fg-msg" aria-live="assertive"></div></form>
+    <div class="card auth-side">${dollHtml("supervisor", 140)}
+      <h3 style="justify-content:center;margin-top:10px">How it works</h3>
+      <ul class="check-list" style="text-align:left;margin-top:12px">
+        <li>The link works once and expires after an hour.</li>
+        <li>Asking again cancels any earlier link.</li>
+        <li>Setting a new password signs you out everywhere else.</li>
+        <li>We never say whether an address has an account — that would let anyone test who has registered.</li>
+      </ul></div></div>`;
+  mountAll(el, { mood: "think" });
+  c.onSubmit(el.querySelector("#f-forgot"), async () => {
+    const msg = el.querySelector("#fg-msg");
+    msg.innerHTML = `<div class="form-msg">Sending…</div>`;
+    try {
+      const r = await c.api("api/auth/forgot", { email: el.querySelector("#fg-email").value });
+      msg.innerHTML = `<div class="form-msg ok">${esc(r.message)}</div>`;
+    } catch (x) { msg.innerHTML = `<div class="form-msg bad">${esc(x.message)}</div>`; }
+  });
+}
+
+export function pReset(el, c) {
+  const { esc } = c;
+  const token = new URLSearchParams(location.search).get("token") || "";
+  el.innerHTML = `${c.head("Choose a new password", "")}
+  <div class="auth-wrap"><form class="card" id="f-reset" novalidate>
+      ${token ? "" : `<div class="form-msg bad">This link is missing its token. Open the link from your email exactly as it was sent, or <a href="forgot.html">ask for a new one</a>.</div>`}
+      <div class="field"><label class="lbl" for="rs-pw">New password</label>
+        <input id="rs-pw" type="password" autocomplete="new-password" required minlength="8" maxlength="200" data-tip="At least 8 characters with a letter and a number">
+        <div class="pw-meter"><i id="rs-meter"></i></div><div class="field-err" id="rs-err" aria-live="polite"></div></div>
+      <div class="field"><label class="lbl" for="rs-pw2">Confirm new password</label>
+        <input id="rs-pw2" type="password" autocomplete="new-password" required maxlength="200"></div>
+      <button class="btn primary" type="submit" ${token ? "" : "disabled"}>Set my new password</button>
+      <div id="rs-msg" aria-live="assertive"></div></form>
+    <div class="card auth-side">${dollHtml("assessor", 140)}
+      <h3 style="justify-content:center;margin-top:10px">After this</h3>
+      <ul class="check-list" style="text-align:left;margin-top:12px">
+        <li>Every device signed in to your account is signed out.</li>
+        <li>This link stops working, even for you.</li>
+        <li>Your email address counts as confirmed, because you opened the link.</li>
+      </ul></div></div>`;
+  mountAll(el, { mood: "idle" });
+  const pw = el.querySelector("#rs-pw"), meter = el.querySelector("#rs-meter"), err = el.querySelector("#rs-err");
+  pw.oninput = () => {
+    const p = pw.value, prob = passwordProblem(p);
+    const score = Math.min(4, (p.length >= 8) + (p.length >= 12) + (/[A-Z]/.test(p) && /[a-z]/.test(p)) + (/\d/.test(p) && /[^A-Za-z0-9]/.test(p)));
+    meter.style.width = `${(prob ? Math.min(1, score) : Math.max(2, score)) * 25}%`;
+    meter.style.background = prob ? "var(--red)" : score >= 3 ? "var(--lime)" : "var(--amber)";
+    err.textContent = p && prob ? prob : "";
+  };
+  c.onSubmit(el.querySelector("#f-reset"), async () => {
+    const msg = el.querySelector("#rs-msg");
+    try {
+      const r = await c.api("api/auth/reset", { token, password: pw.value, confirm: el.querySelector("#rs-pw2").value });
+      pw.value = el.querySelector("#rs-pw2").value = "";
+      c.sound.play("level");
+      msg.innerHTML = `<div class="form-msg ok">${esc(r.message)} <a href="login.html">Sign in</a></div>`;
+    } catch (x) { msg.innerHTML = `<div class="form-msg bad">${esc(x.message)}</div>`; c.sound.play("bad"); }
+  });
+}
+
+export async function pVerify(el, c) {
+  const { esc } = c;
+  const token = new URLSearchParams(location.search).get("token") || "";
+  el.innerHTML = `${c.head("Confirming your email", "")}<div class="card loading-card"><span class="spinner" aria-hidden="true"></span> Checking the link…</div>`;
+  if (!token) {
+    el.innerHTML = `${c.head("Confirming your email", "")}<div class="card error-card"><h3>That link is incomplete</h3>
+      <p class="small muted">Open the link from your email exactly as it was sent. If it still fails, sign in and ask for a new one from your Account page.</p>
+      <a class="btn ghost sm" href="login.html">Sign in</a></div>`;
+    return;
+  }
+  try {
+    const r = await c.api("api/auth/verify", { token });
+    c.confetti();
+    el.innerHTML = `${c.head("Email confirmed", "")}<div class="card"><h3>✓ ${esc(r.message)}</h3>
+      <p class="small muted">You can now recover your account by email if you ever forget your password.</p>
+      <a class="btn primary sm" href="app.html">Open my dashboard</a></div>`;
+  } catch (x) {
+    el.innerHTML = `${c.head("Confirming your email", "")}<div class="card error-card"><h3>That link did not work</h3>
+      <p class="small muted">${esc(x.message)}</p>
+      <a class="btn ghost sm" href="login.html">Sign in</a></div>`;
+  }
 }

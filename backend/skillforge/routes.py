@@ -78,6 +78,12 @@ ROUTES: List[Route] = [
     ("POST", r"/api/auth/logout", _logout, ()),
     ("GET", r"/api/auth/me", lambda c: s.me(c.user), ()),
     ("POST", r"/api/auth/password", lambda c: s.change_password(c.user, c.body), ("student", "faculty", "admin")),
+    # Reset and verification: the token in the body is the only credential needed,
+    # so these three stay public. See auth.py for the no-enumeration rule.
+    ("POST", r"/api/auth/forgot", lambda c: s.forgot_password(c.body, c.ip), ()),
+    ("POST", r"/api/auth/reset", lambda c: s.reset_password(c.body), ()),
+    ("POST", r"/api/auth/verify", lambda c: s.verify_email(c.body), ()),
+    ("POST", r"/api/auth/verify/send", lambda c: s.send_verification(c.user), ("student", "faculty", "admin")),
     # --- data consent & privacy (GDPR / DPDP) ----------------------------
     ("GET", r"/api/privacy/consent", lambda c: s.get_consent(c.user), ()),
     ("POST", r"/api/privacy/consent", lambda c: s.save_consent(c.user, c.body), ("student", "faculty", "admin")),

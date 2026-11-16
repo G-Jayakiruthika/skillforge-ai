@@ -1,0 +1,42 @@
+# Fly.io configuration.
+#   fly launch --no-deploy
+#   fly volumes create skillforge_data --size 1
+#   fly secrets set SKILLFORGE_SECRET=... SKILLFORGE_CORS_ORIGINS=https://yourdomain.com \
+#                   SKILLFORGE_BASE_URL=https://yourdomain.com SKILLFORGE_ADMIN_EMAIL=you@example.com
+#   fly deploy
+app = "skillforge-ai"
+primary_region = "bom"          # Mumbai: closest region for users in India
+
+[build]
+  dockerfile = "Dockerfile"
+
+[env]
+  SKILLFORGE_PUBLIC = "1"
+  SKILLFORGE_DB = "/data/skillforge.db"
+  SKILLFORGE_SESSION_HOURS = "72"
+  PORT = "8000"
+
+[mounts]
+  # The database must live on the volume, or a redeploy takes every account with it.
+  source = "skillforge_data"
+  destination = "/data"
+
+[http_service]
+  internal_port = 8000
+  force_https = true
+  auto_stop_machines = "suspend"
+  auto_start_machines = true
+  # One machine on purpose: SQLite and the in-process rate limiter are not shared
+  # between machines. Raise this only after moving to Postgres.
+  min_machines_running = 1
+
+  [[http_service.checks]]
+    grace_period = "10s"
+    interval = "30s"
+    method = "GET"
+    path = "/api/health"
+    timeout = "5s"
+
+[[vm]]
+  size = "shared-cpu-1x"
+  memory = "512mb"

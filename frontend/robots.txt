@@ -8,6 +8,9 @@ Disallow: /portal.html
 Disallow: /consent.html
 Disallow: /login.html
 Disallow: /signup.html
+Disallow: /forgot.html
+Disallow: /reset.html
+Disallow: /verify.html
 Disallow: /*?diag=
 Disallow: /*?reset=
 
