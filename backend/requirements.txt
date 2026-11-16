@@ -17,7 +17,7 @@ pydantic>=2.7,<3.0
 
 # Agent orchestration. Optional: skillforge/graph.py falls back to a built-in
 # state machine that produces identical results when this is missing.
-langgraph>=0.2,<1.0
+langgraph>=1.2.21,<2.0
 
 # Google Gemini. Optional: only used when GEMINI_API_KEY is set AND the user
 # has turned on AI processing consent. Without it every agent still runs.
